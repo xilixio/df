@@ -1,9 +1,24 @@
 #!/bin/bash
 source ./test_framework.sh
 
-run_test "Adding 2 and 3" "./sum.sh 2 3" "5" 0 # Successful 
-run_test "Adding with only one argument" "./sum.sh 2" "Usage: ./sum.sh number1 number2" 1 # Failure 
-multi_line_var=$(cat <<EOF
+declare -A t=(
+    [description]="Adding 2 and 3"
+    [command]="./sum.sh 2 3"
+    [expected_output]="5"
+    [expected_status]=0
+); run_test t
+
+declare -A t=(
+    [description]="Adding with only one argument fails"
+    [command]="./sum.sh 2"
+    [expected_output]="Usage: ./sum.sh number1 number2"
+    [expected_status]=1
+); run_test t
+
+declare -A t=(
+    [description]="Multiline output"
+    [command]="./multiline.sh"
+    [expected_output]=$(cat <<EOF
 This
 is
 some
@@ -11,7 +26,14 @@ multiline
 output
 EOF
 )
-run_test "Multiline output" "./multiline.sh" "$multi_line_var" 0 # Success
-run_test "Simulate failure" "false" "" 1 # Failure (exit status)
+    [expected_status]=0
+); run_test t
+
+declare -A t=(
+    [description]="Simulate failure"
+    [command]="false"
+    [expected_output]=""
+    [expected_status]=1
+); run_test t
 
 test_summary
