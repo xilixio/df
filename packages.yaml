@@ -25,8 +25,11 @@ packages:
     Linux:
       install: "sh pk3.sh"
       check: "[ -e /tmp/pk3.tmp ]"
-  pk_no_os:
-    Something: "tbd"
-  pk_no_check:
-    Linux: "tbd"
-    Darwin: "tbd"
+  pk_no_os: "tbd"
+  pk_no_check: 
+    Linux: 
+      install: ""
+      check: ""
+    Darwin:
+      install: ""
+      check: ""

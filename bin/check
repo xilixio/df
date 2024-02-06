@@ -21,7 +21,7 @@ if ! output=$(yq ".packages.$package.$os.check" < "$yaml_file") || [ -z "$output
     exit 1
 fi
 
-# Get arguments
+# Parse arguments
 s_flag=false
 
 while [ "$#" -gt 0 ]; do
