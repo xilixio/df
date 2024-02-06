@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Check if at least one argument was provided
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <subcommand> [arguments...]"
+    exit 1
+fi
+
+# Check if the yq command is installed
+if ! command -v yq &> /dev/null; then
+  echo "Error: 'yq' is not installed. Please install 'yq' to parse YAML files."
+  exit 1
+fi
+
+# Variables used in subcommands
+yaml_file="packages.yaml"
+
+# Extract the subcommand
+subcommand="$1"
+shift  # Remove the first argument, leaving any additional arguments
+
+# Build the path to the subcommand script
+script_dir=$(dirname "$(realpath "$0")")
+subcommand_script="${script_dir}/${subcommand}"
+
+# Check if the subcommand script exists and is executable
+if [ ! -f "$subcommand_script" ]; then
+    echo "Error: Subcommand '$subcommand_script' does not exist."
+    exit 1
+elif [ ! -x "$subcommand_script" ]; then
+    echo "Error: Subcommand '$subcommand_script' is not executable. Please set execute permissions."
+    exit 1
+fi
+
+# Source the subcommand script and forward the remaining arguments
+# Variables declared in this runner script will be available to the sourced subcommand script
+source "$subcommand_script" "$@"

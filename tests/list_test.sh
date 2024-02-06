@@ -2,7 +2,7 @@
 
 declare -A t=(
     [description]="List all packages in plaintext"
-    [command]="bin/list"
+    [command]="bin/df list"
     [expected_output]=$(cat <<EOF
 pk1
 pk2
