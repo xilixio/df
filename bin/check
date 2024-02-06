@@ -1,5 +1,22 @@
 #!/bin/bash
 
-current_os=$(uname -s)
-echo "Package 'pk1' is not installed on $current_os"
-exit 1
+package="$1"
+os="$(uname -s)"
+
+# Check package subcommand
+check_command=$(yq ".packages.$package.$os.check" < "$yaml_file")
+
+if [ -z "$check_command" ]; then
+    echo "'packages.$package.$os.check' entry not found in '$yaml_file'."
+    exit 1
+fi
+
+if eval "$check_command"; then
+    echo "Package '$package' is installed.";
+    exit 0
+else
+    echo "Package '$package' is not installed on $os.";
+    exit 1
+fi
+
+exit 0

@@ -1,3 +1,5 @@
 #!/bin/bash
 
 yq '.packages | keys' < $yaml_file | sed 's/^- //'
+
+exit 0
