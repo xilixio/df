@@ -3,6 +3,8 @@ config:
 packages:
   pk1:
     deps:
+      - pk2
+      - pk3
     Linux:
       install: "sh pk1.sh"
       check: "[ -e tmp/pk1.tmp ]"
@@ -21,8 +23,5 @@ packages:
   pk3:
     deps:
     Linux:
-      install: "sh pk3.sh"
-      check: "[ -e tmp/pk3.tmp ]"
-    Darwin:
       install: "sh pk3.sh"
       check: "[ -e tmp/pk3.tmp ]"
