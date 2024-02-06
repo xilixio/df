@@ -45,6 +45,8 @@ run_test_inline() {
         fi
     else
         echo -e "\033[0;31mFailed\033[0m - Expected exit status \033[0;32m$expected_exit_status\033[0m, got \033[0;31m$actual_exit_status\033[0m"
+        echo -e "\033[0;34m- Output:\033[0m"
+        echo "$result"
         ((tests_failed++))
     fi
 }
