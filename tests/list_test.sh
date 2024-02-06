@@ -7,6 +7,8 @@ declare -A t=(
 pk1
 pk2
 pk3
+pk_no_os
+pk_no_check
 EOF
 )
     [expected_status]=0
