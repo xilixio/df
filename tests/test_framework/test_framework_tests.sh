@@ -1,6 +1,5 @@
 #!/bin/bash
-dir=$(dirname "$(readlink -f "$0")")
-source "$dir/test_framework.sh"
+dir="$PWD/tests/test_framework"
 
 declare -A t=(
     [description]="Adding 2 and 3"
@@ -37,4 +36,3 @@ declare -A t=(
     [expected_status]=1
 ); run_test t
 
-test_summary

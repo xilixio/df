@@ -1,10 +1,9 @@
-TESTS_DIR := ./tests
-FRAMEWORK_TESTS_DIR := $(TESTS_DIR)/test_framework
+TEST_FRAMEWORK_DIR := ./test_framework
 
 test:
-	$(TESTS_DIR)/run_tests.sh
+	$(TEST_FRAMEWORK_DIR)/test_runner.sh list_test
 
 test_framework_test:
-	$(FRAMEWORK_TESTS_DIR)/test_framework_tests.sh
+	$(TEST_FRAMEWORK_DIR)/test_runner.sh test_framework/test_framework_tests
 
 .PHONY: test test_framework_test
