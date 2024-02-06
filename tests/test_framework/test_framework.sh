@@ -26,17 +26,25 @@ run_test_inline() {
     # Cleanup: remove the temporary file
     rm -f "$temp_file"
 
-    echo -n "Test: $test_description ... "
+    echo -en "\033[0;34m- Test:\033[0m $test_description ... "
     if [ "$actual_exit_status" -eq "$expected_exit_status" ]; then
         if [[ "$result" == "$expected_result" ]]; then
-            echo "Passed"
+            echo -e "\033[0;32mPassed\033[0m"
             ((tests_passed++))
         else
-            echo "Failed (Expected '$expected_result', got '$result')"
+            echo -e "\033[0;31mFailed\033[0m"
+            echo -e "\033[0;34m- Got:\033[0m"
+            echo -e "\033[0;31m$result\033[0m\n"
+            echo -e "\033[0;34m- Expected:\033[0m"
+            echo -e "\033[0;32m$expected_result\033[0m\n"
+            echo -e "\033[0;34m- Diff:\033[0m"
+            diff <(echo "$expected_result") <(echo "$result") --color=always
+            echo ""
+
             ((tests_failed++))
         fi
     else
-        echo "Failed - Expected exit status $expected_exit_status, got $actual_exit_status"
+        echo -e "\033[0;31mFailed\033[0m - Expected exit status \033[0;32m$expected_exit_status\033[0m, got \033[0;31m$actual_exit_status\033[0m"
         ((tests_failed++))
     fi
 }
@@ -52,11 +60,11 @@ run_test() {
 
 # Function to display test summary
 test_summary() {
-    echo "Tests run: $tests_run, Passed: $tests_passed, Failed: $tests_failed"
+    echo -e "\nTests run: $tests_run, Passed: $tests_passed, Failed: $tests_failed"
     if [ "$tests_failed" -ne 0 ]; then
-        echo "Some tests failed."
+        echo -e "\033[0;31mSome tests failed\033[0m"
         exit 1
     else
-        echo "All tests passed."
+        echo -e "\033[0;32mAll tests passed\033[0m"
     fi
 }
