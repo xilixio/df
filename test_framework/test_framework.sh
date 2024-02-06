@@ -12,13 +12,33 @@ run_test_inline() {
     command_to_test="$2"
     expected_result="$3"
     expected_exit_status="${4:-0}" # Default exit status is 0 if not specified
+    before_test="$5"
+    after_test="$6"
 
     # Create a temporary file for the command output
     temp_file=$(mktemp)
 
+    # Before test
+    if ! before_test_output=$($before_test 2>&1 >/dev/null); then
+        echo -e "\033[0;31mBefore test error:\033[0m"
+        echo -e "\033[0;34m$before_test\033[0m"
+        echo "$before_test_output"
+        echo ""
+        exit 1
+    fi
+
     # Execute the command, redirecting output to the temp file, capturing both stdout and stderr
     eval "$command_to_test" > "$temp_file" 2>&1
     actual_exit_status=$?
+
+    # After test
+    if ! after_test_output=$($after_test 2>&1 >/dev/null); then
+        echo -e "\033[0;31mAfter test error:\033[0m"
+        echo -e "\033[0;34m$after_test\033[0m"
+        echo "$after_test_output"
+        echo ""
+        exit 1
+    fi
 
     # Read the output from the temp file
     result=$(<"$temp_file") # Using redirection is slightly more efficient than cat
@@ -55,9 +75,11 @@ run_test() {
     local -n params=$1 # Use nameref for indirect reference to the associative array
     run_test_inline \
         "${params[description]}" \
-        "${params[command]}" \
+        "${params[test]}" \
         "${params[expected_output]}" \
-        "${params[expected_status]}"
+        "${params[expected_status]}" \
+        "${params[before_test]}" \
+        "${params[after_test]}"
 }
 
 # Function to display test summary

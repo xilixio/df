@@ -1,0 +1,5 @@
+#!/bin/bash
+
+current_os=$(uname -s)
+echo "Package 'pk1' is not installed on $current_os"
+exit 1
