@@ -2,11 +2,11 @@ TEST_FRAMEWORK_DIR := ./test_framework
 TESTS :=  list_test check_test
 
 test:
-	$(TEST_FRAMEWORK_DIR)/test_runner.sh $(TESTS)
+	bin/t $(TESTS)
 t:
-	$(TEST_FRAMEWORK_DIR)/test_runner.sh $(TESTS)
+	bin/t $(TESTS)
 
-test_framework_test:
-	$(TEST_FRAMEWORK_DIR)/test_runner.sh test_framework/test_framework_tests
+t_test:
+	bin/t t_test
 
 .PHONY: test t test_framework_test

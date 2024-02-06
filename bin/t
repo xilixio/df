@@ -1,9 +1,17 @@
 #!/bin/bash
 
+# Check if any arguments were passed
+if [ "$#" -eq 0 ]; then
+    echo "No arguments provided."
+    echo "Usage: $0 test1 [test2 ...]"
+    exit 1
+fi
+
 # Initialize variables
 tests_run=0
 tests_passed=0
 tests_failed=0
+tests_dir="$PWD/tests"
 
 # Function to run a test
 run_test_inline() {
@@ -14,6 +22,7 @@ run_test_inline() {
     expected_exit_status="${4:-0}" # Default exit status is 0 if not specified
     before_test="$5"
     after_test="$6"
+    test_name="$arg"
 
     # Create a temporary file for the command output
     temp_file=$(mktemp)
@@ -46,7 +55,7 @@ run_test_inline() {
     # Cleanup: remove the temporary file
     rm -f "$temp_file"
 
-    echo -en "\033[0;34m- Test:\033[0m $test_description ... "
+    echo -en "\033[0;34m[$test_name]\033[0m $test_description ... "
     if [ "$actual_exit_status" -eq "$expected_exit_status" ]; then
         if [[ "$result" == "$expected_result" ]]; then
             echo -e "\033[0;32mPassed\033[0m"
@@ -92,3 +101,17 @@ test_summary() {
         echo -e "\033[0;32mAll tests passed\033[0m"
     fi
 }
+
+# Iterate over all passed arguments
+for arg in "$@"; do
+    test_file="${arg}.sh"
+
+    # Check if the script file exists and is readable
+    if [ -r "$tests_dir/$test_file" ]; then
+        source "$tests_dir/$test_file"
+    else
+        echo "Warning: Testfile '$tests_dir/$test_file' not found or not readable."
+    fi
+done
+
+test_summary
