@@ -1,88 +1,68 @@
 #!/bin/bash
 
-# Parse arguments
+# Initialize flags and default values
 a_flag=false
 o_flag="$(uname -s)"
 i_flag=null
 
+# Parse arguments
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        -a)
-            a_flag=true
-            ;;
-        -o)
-            shift 
-            o_flag="$1"
-            ;;
-        -i)
-            shift
-            i_flag="$1"
-            ;;
-        *)
-            ;;
+        -a) a_flag=true ;;
+        -o) shift; o_flag="$1" ;;
+        -i) shift; i_flag="$1" ;;
     esac
-    shift 
+    shift
 done
 
 # Read the output into an array named 'packages'
 mapfile -t packages < <(yq '.packages | keys' < "$yaml_file" | sed 's/^- //')
 oss=("Linux" "Darwin")
 
-# Iterate over the array
+# Iterate over packages
 for package in "${packages[@]}"; do
     is_installed=null
 
-    # Validate if OS is defined
-    if ! ( ! output=$(yq ".packages.$package.$o_flag" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ] ); then
-        if [ "$i_flag" = "null" ] && [ "$a_flag" = false ] ; then
-            echo "$package"
-        elif [ "$i_flag" = "true" ] || [ "$i_flag" = "false" ] || [ "$a_flag" = true ]; then
-            if bin/df check "$package" >/dev/null 2>&1; then
-                is_installed=true
-            else
-                is_installed=false
-            fi
+    # Check if OS-specific command exists for package
+    output=$(yq ".packages.$package.$o_flag" < "$yaml_file")
+    if [ -z "$output" ] || [ "$output" = "null" ]; then
+        continue # Skip this iteration if OS-specific command does not exist
+    fi
 
-            if [ "$a_flag" = false ] && [ "$i_flag" = "true" ] && [ "$is_installed" = true ]; then
-                echo "$package"
-            fi
+    # Check installation status
+    if bin/df check "$package" >/dev/null 2>&1; then
+        is_installed=true
+    else
+        is_installed=false
+    fi
 
-            if [ "$a_flag" = false ] && [ "$i_flag" = "false" ] && [ "$is_installed" = false ]; then
-                echo "$package"
-            fi
-        fi
-
-        if [ "$a_flag" = true ] ; then
-            echo -n "$package ( "
+    # Logic for echoing package based on flags and installation status
+    if { [ "$i_flag" = "null" ] && [ "$a_flag" = false ]; } ||
+       { [ "$a_flag" = false ] && [ "$i_flag" = "$is_installed" ]; } ||
+       [ "$a_flag" = true ]; then
+        echo -n "$package ( "
             
-            for os in "${oss[@]}"; do
-                if ! ( ! output=$(yq ".packages.$package.$os" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ] ); then
-                    echo -n "$os "
-                fi
+        for os in "${oss[@]}"; do
+            output=$(yq ".packages.$package.$os" < "$yaml_file")
+            if [[ ! -z "$output" && "$output" != "null" ]]; then
+                echo -n "$os "
+            fi
+        done
+
+        echo ") [$([ "$a_flag" = true ] && [ "$is_installed" = true ] && echo "Installed" || echo "Not installed")]"
+    fi
+
+    # Handle dependencies if a_flag is true
+    if [ "$a_flag" = true ]; then
+        mapfile -t deps < <(yq ".packages.$package.deps" < "$yaml_file" | sed 's/^- //')
+        echo -n "  Deps: "
+        if [ "${#deps[@]}" -eq 0 ] || [ ! "$deps" ] || [ "$deps" = "null" ]; then
+            echo "<none>"
+        else
+            for dep in "${deps[@]}"; do
+                echo -n "$dep "
             done
-
-            echo -n ") "
-
-            if [ "$is_installed" = true ]; then
-                echo "[Installed]"
-            else 
-                
-                echo "[Not installed]"
-            fi
-
-            mapfile -t deps < <(yq ".packages.$package.deps" < "$yaml_file" | sed 's/^- //')
-
-            echo -n "  Deps: "
-
-            if [ ! "$deps" ] || [ "$deps" = "null" ]; then
-                echo "<none>"
-            else
-                for dep in "${deps[@]}"; do
-                    echo -n "$dep "
-                done
-
-                echo ""
-            fi
+            echo ""
         fi
     fi
 done
