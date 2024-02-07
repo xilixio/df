@@ -30,6 +30,12 @@ oss=("Linux" "Darwin")
 
 # Iterate over the array
 for package in "${packages[@]}"; do
+    # Early echo and continue if no arguments were passed
+    if [ "$#" -eq 0 ]; then
+        echo "$package"
+        continue
+    fi
+
     is_installed=null
 
     # Validate if OS is defined

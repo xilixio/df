@@ -4,7 +4,6 @@ packages:
   pk1:
     deps:
       - pk2
-      - pk3
     Linux:
       install: "sh pk1.sh"
       check: "[ -e /tmp/pk1.tmp ]"
@@ -27,6 +26,25 @@ packages:
       check: "[ -e /tmp/pk3.tmp ]"
   pk_no_os: "tbd"
   pk_no_check: 
+    Linux: 
+      install: ""
+      check: ""
+    Darwin:
+      install: ""
+      check: ""
+  pkCD1: 
+    deps:
+      - pk1
+      - pkCD2
+    Linux: 
+      install: ""
+      check: ""
+    Darwin:
+      install: ""
+      check: ""
+  pkCD2: 
+    deps:
+      - pkCD1
     Linux: 
       install: ""
       check: ""
