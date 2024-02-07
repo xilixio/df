@@ -1,0 +1,23 @@
+#!/bin/bash
+
+package="$1"
+
+# Validate if package is defined
+if ! output=$(yq ".packages.$package" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Package '$package' is not defined in '$yaml_file'."
+    exit 1
+fi
+
+# Check for empty deps or missing entry
+if ! output=$(yq ".packages.$package.deps" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    exit 0
+fi
+
+# Get deps and output
+mapfile -t deps < <(yq ".packages.$package.deps" < "$yaml_file" | sed 's/^- //')
+
+for dep in "${deps[@]}"; do
+    echo "$dep"
+done
+
+exit 0
