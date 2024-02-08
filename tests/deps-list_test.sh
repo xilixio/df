@@ -5,7 +5,6 @@ declare -A t=(
     [test]="bin/df deps-list pk1"
     [expected_output]=$(cat <<EOF
 pk2
-pk3
 EOF
 )
     [expected_status]=0

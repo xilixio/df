@@ -5,33 +5,36 @@ packages:
     deps:
       - pk2
     Linux:
-      install: "sh pk1.sh"
+      install: "touch /tmp/pk1.tmp"
       check: "[ -e /tmp/pk1.tmp ]"
     Darwin:
-      install: "sh pk1.sh"
+      install: "touch /tmp/pk1.tmp"
       check: "[ -e /tmp/pk1.tmp ]"
   pk2:
     deps:
       - pk3
     Linux:
-      install: "sh pk2.sh"
+      install: "touch /tmp/pk2.tmp"
       check: "[ -e /tmp/pk2.tmp ]"
     Darwin:
-      install: "sh pk2.sh"
+      install: "touch /tmp/pk2.tmp"
       check: "[ -e /tmp/pk2.tmp ]"
   pk3:
     deps:
     Linux:
-      install: "sh pk3.sh"
+      install: "touch /tmp/pk3.tmp"
       check: "[ -e /tmp/pk3.tmp ]"
   pk_no_os: "tbd"
   pk_no_check: 
     Linux: 
-      install: ""
-      check: ""
+      install: "true"
     Darwin:
-      install: ""
-      check: ""
+      install: "true"
+  pk_no_install: 
+    Linux: 
+      check: "true"
+    Darwin:
+      check: "true"
   pkCD1: 
     deps:
       - pk1
@@ -51,3 +54,11 @@ packages:
     Darwin:
       install: ""
       check: ""
+  pk_install_fail: 
+    deps:
+    Linux: 
+      install: "echo \"Some error.\"; exit 1"
+      check: "true"
+    Darwin:
+      install: "echo \"Some error.\"; exit 1"
+      check: "true"
