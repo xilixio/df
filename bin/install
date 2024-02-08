@@ -1,0 +1,150 @@
+#!/bin/bash
+
+packages=()
+os=$(uname -s)
+s_flag=false # silent
+y_flag=false # don't prompt y/n
+i_flag=false # ignore failures
+
+declare -A packages_seen
+
+# Process command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        -s) 
+            s_flag=true 
+            ;;
+        -y) 
+            y_flag=true 
+            ;;
+        -i) 
+            i_flag=true 
+            ;;
+        *)  
+            packages+=("$1")
+            ;;
+    esac
+
+    shift 
+done
+
+validate_package() {
+    local package=$1
+    local error=false
+
+    # Validate if package is defined
+    if ! output=$(yq ".packages.$package" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        ! $s_flag && echo "Package '$package' is not defined in '$yaml_file'."
+        error=true
+    fi
+
+    # Validate if OS is defined
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Package's '$package' OS '$os' is not defined in '$yaml_file'."
+        error=true
+    fi
+
+    # Validate if 'check' is defined
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.check" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Missing 'check' entry on 'packages.$package.$os' in '$yaml_file'."
+        error=true
+    fi
+
+    # Validate if 'install' is defined
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.install" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Missing 'install' entry on 'packages.$package.$os' in '$yaml_file'."
+        error=true
+    fi
+
+    if [[ "$error" = true ]] && [[ "$i_flag" = true ]]; then
+        return
+    fi
+
+    if [[ "$error" = true ]]; then
+        exit 1;
+    fi
+}
+
+install_package() {
+    local package=$1
+    local user_input="y"
+
+    if [[ -v packages_seen["$package"] ]]; then
+        return
+    fi
+
+    packages_seen["$package"]=true
+
+    ! $y_flag && read -rp "About to install package '$package'. Do you want to continue? (y/n): " user_input
+
+    if ! [[ "$user_input" == "y" ]]; then
+        ! $s_flag && echo "Aborting..."
+        exit 1
+    fi
+
+    validate_package "$package"
+
+    # Check if the package has already been installed
+    if output=$(bin/df check "$package" 2>&1); then
+        ! $s_flag && echo "Package '$package' was already installed, skipping."
+        return
+    fi
+
+    install=$(yq ".packages.$package.$os.install" < "$yaml_file")
+
+    if ! install_output=$(eval "$install"); then 
+        ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
+        exit 1
+    fi
+
+    ! $s_flag && echo "Successfully installed package '$package'."
+}
+
+walk_deps_and_install() {
+    local package=$1
+    local path="$2"
+    local new_path="${path}->${package}"
+
+    if [[ "$path" =~ "->${package}" ]]; then
+        echo "A cyclic dependency involving '$package' was found in the path '$new_path'."
+        exit 1
+    fi
+
+    mapfile -t deps < <(bin/df deps-list "$package")
+
+    for dep in "${deps[@]}"; do
+        walk_deps_and_install "$dep"  "$new_path"
+    done
+
+    install_package "$package"
+}
+
+# Main
+if [ ${#packages[@]} -eq 0 ]; then
+    mapfile -t packages < <(bin/df list)
+fi 
+
+! $s_flag && echo -n "About to install the following packages: "
+
+for package in "${packages[@]}"; do
+    ! $s_flag && echo -n "$package " 
+done
+
+! $s_flag && echo ""
+
+user_input="y"
+
+! $y_flag && read -rp "Do you want to continue? (y/n): " user_input
+
+if ! [[ "$user_input" == "y" ]]; then
+    ! $s_flag && echo "Aborting..."
+    exit 1
+fi
+
+y_flag=true
+
+for package in "${packages[@]}"; do
+    walk_deps_and_install "$package"  "<root>"
+done
+
+exit 0

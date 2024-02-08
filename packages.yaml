@@ -37,8 +37,8 @@ packages:
       check: "true"
   pkCD1: 
     deps:
-      - pk1
       - pkCD2
+      - pk1
     Linux: 
       install: ""
       check: ""
