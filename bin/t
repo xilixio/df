@@ -41,8 +41,9 @@ run_test_inline() {
     actual_exit_status=$?
 
     # After test
-    if ! after_test_output=$($after_test 2>&1 >/dev/null); then
-        echo -e "\033[0;31mAfter test error:\033[0m"
+    if ! after_test_output=$(eval "$after_test" 2>&1 >/dev/null); then 
+        echo -en "\033[0;34m[$test_name]\033[0m $test_description ... "
+        echo -e "\033[0;31mAfter test error\033[0m"
         echo -e "\033[0;34m$after_test\033[0m"
         echo "$after_test_output"
         echo ""
