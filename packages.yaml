@@ -32,33 +32,33 @@ packages:
       install: "true"
   pk_no_install: 
     Linux: 
-      check: "true"
+      check: "false"
     Darwin:
-      check: "true"
+      check: "false"
   pkCD1: 
     deps:
       - pkCD2
       - pk1
     Linux: 
-      install: ""
-      check: ""
+      install: "true"
+      check: "false"
     Darwin:
-      install: ""
-      check: ""
+      install: "true"
+      check: "false"
   pkCD2: 
     deps:
       - pkCD1
     Linux: 
-      install: ""
-      check: ""
+      install: "true"
+      check: "true"
     Darwin:
-      install: ""
-      check: ""
+      install: "true"
+      check: "false"
   pk_install_fail: 
     deps:
     Linux: 
       install: "echo \"Some error.\"; exit 1"
-      check: "true"
+      check: "false"
     Darwin:
       install: "echo \"Some error.\"; exit 1"
-      check: "true"
+      check: "false"

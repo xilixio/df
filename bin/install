@@ -82,13 +82,6 @@ install_package() {
         exit 1
     fi
 
-    validate_package "$package"
-
-    if [ $? -eq 2 ]; then
-        ! $s_flag && echo "Package '$package' has validation errors, ignoring."
-        return
-    fi
-
     # Check if the package has already been installed
     if output=$(bin/df check "$package" 2>&1); then
         ! $s_flag && echo "Package '$package' was already installed, skipping."
@@ -99,6 +92,12 @@ install_package() {
 
     if ! install_output=$(eval "$install"); then 
         ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
+
+        if [[ "$i_flag" = true ]]; then
+            ! $s_flag && echo "Package '$package' has validation errors, ignoring."
+            return
+        fi
+
         exit 1
     fi
 
@@ -109,6 +108,14 @@ walk_deps_and_install() {
     local package=$1
     local path="$2"
     local new_path="${path}->${package}"
+
+    validate_package "$package"
+
+    if [ $? -eq 2 ]; then
+        ! $s_flag && echo "Package '$package' has validation errors, ignoring."
+        return
+    fi
+
 
     if [[ "$path" =~ "->${package}" ]]; then
         ! $s_flag && echo "A cyclic dependency involving '$package' was found in the path '$new_path'."
