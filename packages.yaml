@@ -24,6 +24,11 @@ packages:
     Linux:
       install: "touch /tmp/pk3.tmp"
       check: "[ -e /tmp/pk3.tmp ]"
+  pk4:
+    deps:
+    Darwin:
+      install: "touch /tmp/pk4.tmp"
+      check: "[ -e /tmp/pk4.tmp ]"
   pk_no_os: "tbd"
   pk_no_check: 
     Linux: 
@@ -50,7 +55,7 @@ packages:
       - pkCD1
     Linux: 
       install: "true"
-      check: "true"
+      check: "false"
     Darwin:
       install: "true"
       check: "false"

@@ -1,5 +1,5 @@
 TEST_FRAMEWORK_DIR := ./test_framework
-TESTS :=  check_test deps-cd_test deps-list_test install-package_test list_test
+TESTS :=  check_test deps-cd_test deps-list_test install_test list_test
 
 test:
 	bin/t $(TESTS)

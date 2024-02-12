@@ -1,9 +1,12 @@
 #!/bin/bash
 
 # Parse arguments
-a_flag=false
-o_flag="$(uname -s)"
-i_flag=null
+a_flag=false # Show all packages
+o_flag="" # What OS to show
+s_flag="" # Installation status
+i_flag=false # Package info
+os="$(uname -s)"
+available_oss=("Linux" "Darwin")
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -13,10 +16,26 @@ while [ "$#" -gt 0 ]; do
         -o)
             shift 
             o_flag="$1"
+
+            if [[ "$o_flag" == "Linux" || "$o_flag" == "Darwin" ]]; then
+                os="$o_flag"
+            else
+                echo "Invalid OS '$o_flag'"
+                exit 1
+            fi
+
+            ;;
+        -s)
+            shift
+            s_flag="$1"
+
+            if [[ "$s_flag" != "true" && "$s_flag" != "false" ]]; then
+                echo "-s must be 'true' or 'false'"
+                exit 1
+            fi
             ;;
         -i)
-            shift
-            i_flag="$1"
+            i_flag=true
             ;;
         *)
             ;;
@@ -24,72 +43,103 @@ while [ "$#" -gt 0 ]; do
     shift 
 done
 
+# Validate that -a is not set alongside -o or -s
+if [[ "$a_flag" != "false" ]] && { [[ -n "$o_flag" ]] || [[ -n "$s_flag" ]]; }; then
+    echo "Cannot set -a with -o or -s"
+    exit 1
+fi
+
 # Read the output into an array named 'packages'
 mapfile -t packages < <(yq '.packages | keys' < "$yaml_file" | sed 's/^- //')
-oss=("Linux" "Darwin")
 
-# Iterate over the array
-for package in "${packages[@]}"; do
-    # Early echo and continue if no arguments were passed
-    if [ "$#" -eq 0 ]; then
-        echo "$package"
-        continue
+print_package() {
+    local package_name="$1"; shift
+    local package_is_installed="$1"; shift 
+    local package_oss=()
+    local package_os=
+
+    for package_os in "$@"; do
+        package_oss+=("$package_os")
+    done
+
+    echo -n "$package_name"
+
+    if [ "$i_flag" = "true" ]; then
+        echo -n " "
+
+        # Echo OSs
+        IFS=','
+        oss_text="${package_oss[*]}"
+        unset IFS
+        
+        if [ -z "$oss_text" ]; then
+            echo -n "<empty>"
+        else
+            echo -n "$oss_text"
+        fi
+
+        echo -n " "
+
+        # Echo installation status
+        if [ "$package_is_installed" = "true" ]; then
+            echo -n "installed"
+        else
+            echo -n "not_installed"
+        fi
     fi
 
-    is_installed=null
+    echo ""
+}
 
-    # Validate if OS is defined
-    if ! ( ! output=$(yq ".packages.$package.$o_flag" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ] ); then
-        if [ "$i_flag" = "null" ] && [ "$a_flag" = false ] ; then
-            echo "$package"
-        elif [ "$i_flag" = "true" ] || [ "$i_flag" = "false" ] || [ "$a_flag" = true ]; then
-            if bin/df check "$package" >/dev/null 2>&1; then
-                is_installed=true
-            else
-                is_installed=false
-            fi
-
-            if [ "$a_flag" = false ] && [ "$i_flag" = "true" ] && [ "$is_installed" = true ]; then
-                echo "$package"
-            fi
-
-            if [ "$a_flag" = false ] && [ "$i_flag" = "false" ] && [ "$is_installed" = false ]; then
-                echo "$package"
-            fi
+contains_os() {
+    local needle="$1"; shift
+    
+    for haystack in "$@"; do
+        if [ "$haystack" = "$needle" ]; then
+            return 0
         fi
+    done
 
-        if [ "$a_flag" = true ] ; then
-            echo -n "$package ( "
-            
-            for os in "${oss[@]}"; do
-                if ! ( ! output=$(yq ".packages.$package.$os" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ] ); then
-                    echo -n "$os "
-                fi
-            done
+    return 1
+}
 
-            echo -n ") "
+# Iterate over the packages array
+for package in "${packages[@]}"; do
+    package_installed=""
+    package_oss=()
 
-            if [ "$is_installed" = true ]; then
-                echo "[Installed]"
-            else 
-                
-                echo "[Not installed]"
-            fi
-
-            mapfile -t deps < <(yq ".packages.$package.deps" < "$yaml_file" | sed 's/^- //')
-
-            echo -n "  Deps: "
-
-            if [ ! "$deps" ] || [ "$deps" = "null" ]; then
-                echo "<none>"
-            else
-                for dep in "${deps[@]}"; do
-                    echo -n "$dep "
-                done
-
-                echo ""
-            fi
+    # Get OS's
+    for available_os in "${available_oss[@]}"; do
+        if ! ( ! output=$(yq ".packages.$package.$available_os" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ] ); then
+            package_oss+=("$available_os")
         fi
+    done
+
+    in_os=false
+
+    if contains_os "$os" "${package_oss[@]}"; then
+        in_os=true
+    fi
+
+    # Get installation status if needed
+    if [ "$i_flag" = "true" ] || [ "$s_flag" = "true" ] || [ "$s_flag" = "false" ]; then
+        if [ "$in_os" = "true" ] && bin/df check "$package" >/dev/null 2>&1; then
+            package_installed=true
+        else
+            package_installed=false
+        fi
+    fi
+
+    # Print all packages
+    if [ "$a_flag" = "true" ]; then
+        print_package "$package" "$package_installed" "${package_oss[@]}"
+        continue
+    fi;
+
+    # Filter out by installation status and OS
+    if [ "$in_os" = "true" ] && { { [ "$s_flag" = "true" ] && [ "$package_installed" = "true" ]; } || { [ "$s_flag" = "false" ] && [ "$package_installed" = "false" ]; } }; then
+        print_package "$package" "$package_installed" "${package_oss[@]}"
+        continue
     fi
 done
 
