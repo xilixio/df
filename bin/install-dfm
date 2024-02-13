@@ -20,7 +20,7 @@ case "$os_name" in
 
         if ! command -v yq &>/dev/null; then
             if ! command -v wget &>/dev/null; then
-                apt-get update && apt-get install -y wget
+                sudo apt-get update && apt-get install -y wget
             fi
 
             wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
