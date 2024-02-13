@@ -137,9 +137,16 @@ for package in "${packages[@]}"; do
     fi;
 
     # Filter out by installation status and OS
-    if [ "$in_os" = "true" ] && { { [ "$s_flag" = "true" ] && [ "$package_installed" = "true" ]; } || { [ "$s_flag" = "false" ] && [ "$package_installed" = "false" ]; } }; then
-        print_package "$package" "$package_installed" "${package_oss[@]}"
-        continue
+    if [ "$in_os" = "true" ]; then
+        if [[ -n "$s_flag" ]]; then
+            if { { [ "$s_flag" = "true" ] && [ "$package_installed" = "true" ]; } || { [ "$s_flag" = "false" ] && [ "$package_installed" = "false" ]; } }; then
+                print_package "$package" "$package_installed" "${package_oss[@]}"
+                continue
+            fi
+        else
+            print_package "$package" "$package_installed" "${package_oss[@]}"
+            continue
+        fi
     fi
 done
 

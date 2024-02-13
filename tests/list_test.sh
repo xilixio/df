@@ -2,6 +2,9 @@
 
 os=$(uname -s)
 
+# Before all
+rm /tmp/pk{1,2,3}.tmp >/dev/null 2>&1
+
 declare -A t=(
     [description]="Throw if -a and -o are set"
     [test]="bin/df list -a -o Linux"
@@ -10,7 +13,7 @@ declare -A t=(
 ); run_test t
 
 declare -A t=(
-    [description]="Throw if -a and -o are set"
+    [description]="Throw if -a and -s are set"
     [test]="bin/df list -a -s true"
     [expected_output]="Cannot set -a with -o or -s"
     [expected_status]=1
@@ -23,6 +26,7 @@ declare -A t=(
 pk1
 pk2
 pk3
+pk4
 pk_no_os
 pk_no_check
 pk_no_install
@@ -59,6 +63,7 @@ declare -A t=(
     [expected_output]=$(cat <<EOF
 pk1
 pk2
+pk4
 pk_no_check
 pk_no_install
 pkCD1
@@ -118,6 +123,7 @@ declare -A t=(
     [after_test]="rm /tmp/pk2.tmp"
     [expected_output]=$(cat <<EOF
 pk1
+pk4
 pk_no_check
 pk_no_install
 pkCD1
@@ -136,7 +142,8 @@ declare -A t=(
     [expected_output]=$(cat <<EOF
 pk1 Linux,Darwin not_installed
 pk2 Linux,Darwin installed
-pk3 Linux installed
+pk3 Linux not_installed
+pk4 Darwin not_installed
 pk_no_os <empty> not_installed
 pk_no_check Linux,Darwin not_installed
 pk_no_install Linux,Darwin not_installed
@@ -147,3 +154,36 @@ EOF
 )
     [expected_status]=0
 ); run_test t
+
+declare -A t=(
+    [description]="List installed packages with info for current OS (Linux)"
+    [before_test]="touch /tmp/pk2.tmp"
+    [test]="bin/df list -i -s true"
+    [after_test]="rm /tmp/pk2.tmp"
+    [expected_output]=$(cat <<EOF
+pk2 Linux,Darwin installed
+EOF
+)
+    [expected_status]=0
+); run_test t
+
+declare -A t=(
+    [description]="List NOT installed packages with info for current OS (Linux)"
+    [before_test]="touch /tmp/pk2.tmp"
+    [test]="bin/df list -i -s false"
+    [after_test]="rm /tmp/pk2.tmp"
+    [expected_output]=$(cat <<EOF
+pk1 Linux,Darwin not_installed
+pk3 Linux not_installed
+pk_no_check Linux,Darwin not_installed
+pk_no_install Linux,Darwin not_installed
+pkCD1 Linux,Darwin not_installed
+pkCD2 Linux,Darwin not_installed
+pk_install_fail Linux,Darwin not_installed
+EOF
+)
+    [expected_status]=0
+); run_test t
+
+# After all
+rm /tmp/pk{1,2,3}.tmp >/dev/null 2>&1
