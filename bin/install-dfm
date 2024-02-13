@@ -13,12 +13,6 @@ os_name="$(uname -s)"
 
 case "$os_name" in
     Linux)
-        # Check for sudo access
-        # if [ "$(id -u)" != "0" ]; then
-        #     echo "Please run the installer using sudo"
-        #     exit 1
-        # fi
-
         if ! command -v yq &>/dev/null; then
             if ! command -v wget &>/dev/null; then
                 echo "Installing wget..."
