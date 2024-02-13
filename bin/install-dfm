@@ -20,19 +20,39 @@ case "$os_name" in
 
         if ! command -v yq &>/dev/null; then
             if ! command -v wget &>/dev/null; then
-                sudo apt-get update && apt-get install -y wget
+                echo "Installing wget..."
+                
+                if ! (apt-get update && apt-get install -y wget); then
+                    echo "Error installing wget. Aborting."
+                    exit 1
+                fi
             fi
 
-            wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+            echo "Installing yq..."
+            
+            if ! (wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && chmod +x /usr/local/bin/yq); then
+                echo "Error installing yq. Aborting."
+                exit 1
+            fi
         fi
         ;;
     Darwin)
         if ! command -v yq &>/dev/null; then
             if ! command -v brew &>/dev/null; then
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                echo "Installing Homebrew..."
+
+                if ! (/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"); then
+                    echo "Error installing Homebrew. Aborting."
+                    exit 1
+                fi
             fi
 
-            brew install yq
+            echo "Installing yq..."
+            
+            if ! (brew install yq); then
+                echo "Error installing yq. Aborting."
+                exit 1
+            fi
         fi
         ;;
     *)
