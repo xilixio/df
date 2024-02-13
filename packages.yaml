@@ -1,5 +1,3 @@
-config:
-  description: "Example packages.yaml for testing."
 packages:
   pk1:
     deps:
