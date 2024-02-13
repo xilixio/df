@@ -2,7 +2,7 @@
 
 declare -A t=(
     [description]="Get the dependencies of a package"
-    [test]="bin/df deps-list pk1"
+    [test]="bin/df deps pk1"
     [expected_output]=$(cat <<EOF
 pk2
 EOF
@@ -13,7 +13,7 @@ EOF
 declare -A t=(
     [description]="Throw if package doesn't exist"
     [before_test]=""
-    [test]="bin/df deps-list pk1010101"
+    [test]="bin/df deps pk1010101"
     [after_test]=""
     [expected_output]="Package 'pk1010101' is not defined in 'packages.yaml'."
     [expected_status]=1
@@ -22,7 +22,7 @@ declare -A t=(
 declare -A t=(
     [description]="Get empty deps"
     [before_test]=""
-    [test]="bin/df deps-list pk3"
+    [test]="bin/df deps pk3"
     [after_test]=""
     [expected_output]=""
     [expected_status]=0

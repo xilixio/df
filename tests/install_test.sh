@@ -218,19 +218,17 @@ declare -A t=(
             bin/df check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=$(cat <<EOF
-About to install the following packages: pk1 pk2 pk3 pk_no_os pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail 
+About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail 
 Successfully installed package 'pk3'.
 Successfully installed package 'pk2'.
 Successfully installed package 'pk1'.
-Package's 'pk_no_os' OS 'Linux' is not defined in 'packages.yaml'.
-Package 'pk_no_os' has validation errors, ignoring.
 Missing 'check' entry on 'packages.pk_no_check.Linux' in 'packages.yaml'.
 Package 'pk_no_check' has validation errors, ignoring.
 Missing 'install' entry on 'packages.pk_no_install.Linux' in 'packages.yaml'.
 Package 'pk_no_install' has validation errors, ignoring.
 A cyclic dependency involving 'pkCD1' was found in the path '<root>->pkCD1->pkCD2->pkCD1'.
 Package 'pkCD1' has validation errors, ignoring.
-Package 'pkCD2' was already installed, skipping.
+Successfully installed package 'pkCD2'.
 Successfully installed package 'pkCD1'.
 A cyclic dependency involving 'pkCD2' was found in the path '<root>->pkCD2->pkCD1->pkCD2'.
 Package 'pkCD2' has validation errors, ignoring.

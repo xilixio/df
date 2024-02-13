@@ -128,7 +128,7 @@ walk_deps_and_install() {
         exit 1
     fi
 
-    mapfile -t deps < <(bin/df deps-list "$package")
+    mapfile -t deps < <(bin/df deps "$package")
 
     for dep in "${deps[@]}"; do
         walk_deps_and_install "$dep"  "$new_path"
