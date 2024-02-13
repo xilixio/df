@@ -123,7 +123,7 @@ for package in "${packages[@]}"; do
 
     # Get installation status if needed
     if [ "$i_flag" = "true" ] || [ "$s_flag" = "true" ] || [ "$s_flag" = "false" ]; then
-        if [ "$in_os" = "true" ] && bin/df check "$package" >/dev/null 2>&1; then
+        if [ "$in_os" = "true" ] && dfm check "$package" >/dev/null 2>&1; then
             package_installed=true
         else
             package_installed=false
