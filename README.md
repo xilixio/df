@@ -1,1 +1,2 @@
-# df
+# dfm - Dot Files Manager
+
