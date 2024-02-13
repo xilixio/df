@@ -1,4 +1,12 @@
 #!/bin/bash
 
-cd ~/.dotfiles
-git status
+dotfiles_dir="$HOME/.dotfiles"
+
+if ! [ -d "$dotfiles_dir" ]; then
+    echo "$dotfiles_dir doesn't exist"
+    exit 1
+fi
+
+cd ~/.dotfiles || exit 1
+
+git status -s
