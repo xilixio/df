@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Ask the user if they want to install dfm
+printf "Do you want to install dfm? (y/n): "
+read answer
+
+# Check the user's answer
+if [ "$answer" != "y" ]; then
+    echo "Installation aborted by the user."
+    exit 0
+fi
+
 # Define the .dfm directory path
 dfm_dir="$HOME/.dfm"
 
