@@ -8,7 +8,7 @@ fi
 
 # Check if the yq command is installed
 if ! command -v yq &> /dev/null; then
-  echo "Error: 'yq' is not installed. Please install 'yq' to parse YAML files."
+  echo "Error: 'yq' is not installed. Please run bin/install-dfm to install dependencies."
   exit 1
 fi
 

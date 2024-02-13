@@ -1,31 +1,58 @@
 #!/bin/bash
 
-# Ask the user if they want to install dfm
 printf "Do you want to install dfm? (y/n): "
-read answer
+read -r answer
 
-# Check the user's answer
 if [ "$answer" != "y" ]; then
     echo "Installation aborted by the user."
     exit 0
 fi
 
-# Define the .dfm directory path
+# Install pre requisites
+os_name="$(uname -s)"
+
+case "$os_name" in
+    Linux)
+        sudo su -
+
+        if ! command -v yq &>/dev/null; then
+            if ! command -v wget &>/dev/null; then
+                apt-get update -y
+                apt-get install wget
+            fi
+
+            wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        fi
+        ;;
+    Darwin)
+        if ! command -v yq &>/dev/null; then
+            if ! command -v brew &>/dev/null; then
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            fi
+
+            brew install yq
+        fi
+        ;;
+    *)
+        echo "Unsupported OS: $os_name"
+        exit 1
+        ;;
+esac
+
+# Clone dfm
 dfm_dir="$HOME/.dfm"
 
-# Check if the .dfm directory exists
 if [ -d "$dfm_dir" ]; then
     echo ".dfm directory already exists, aborting."
     exit 1
 fi
 
-# Attempt to clone the dfm repository
 if ! git clone https://github.com/xilixio/df.git "$dfm_dir" 2>/dev/null; then
     echo "Failed installing dfm. Error: Could not clone the repository."
     exit 1
 fi
 
-# Determine the user's default shell and its configuration file
+# Add dfm/bin to PATH
 shell_config_file=""
 case "$SHELL" in
     */bash)
@@ -40,7 +67,6 @@ case "$SHELL" in
         ;;
 esac
 
-# Append the PATH export to the shell configuration file
 if ! echo "export PATH=\"\$PATH:$dfm_dir/bin\"" >> "$shell_config_file"; then
     echo "Failed installing dfm. Error: Could not update shell configuration."
     exit 1
