@@ -90,7 +90,7 @@ esac
 
 echo "Updating PATH in shell config '$shell_config_file'..."
 
-if ! (echo "export PATH=\"\$PATH:$dfm_dir/bin/dfm\"" >> "$shell_config_file"); then
+if ! (echo "export PATH=\"\$PATH:$dfm_dir/bin\"" >> "$shell_config_file"); then
     echo "Failed installing dfm. Error: Could not update shell configuration."
     exit 1
 fi
