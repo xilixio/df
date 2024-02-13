@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd "$DFM_DOTFILES"
+
+git status -s

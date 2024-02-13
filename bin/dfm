@@ -12,16 +12,19 @@ if ! command -v yq &> /dev/null; then
   exit 1
 fi
 
-# Variables used in subcommands
-yaml_file="packages.yaml"
+# Check if the dotfiles dir exists
+if ! [ -d "$DFM_DOTFILES" ]; then
+    echo "Dotfiles dir '$DFM_DOTFILES' doesn't exist. Please create one and initialize it as a Github repository."
+    exit 1
+fi
 
 # Extract the subcommand
 subcommand="$1"
 shift  # Remove the first argument, leaving any additional arguments
 
 # Build the path to the subcommand script
-script_dir=$(dirname "$(realpath "$0")")
-subcommand_script="${script_dir}/${subcommand}"
+script_dir=$(dirname "$(readlink -f "$0" || realpath "$0")")
+subcommand_script=$(realpath "${script_dir}/../scripts/${subcommand}")
 
 # Check if the subcommand script exists and is executable
 if [ ! -f "$subcommand_script" ]; then

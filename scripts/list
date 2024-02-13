@@ -50,7 +50,7 @@ if [[ "$a_flag" != "false" ]] && { [[ -n "$o_flag" ]] || [[ -n "$s_flag" ]]; }; 
 fi
 
 # Read the output into an array named 'packages'
-mapfile -t packages < <(yq '.packages | keys' < "$yaml_file" | sed 's/^- //')
+mapfile -t packages < <(yq '.packages | keys' < "$DFM_YAML" | sed 's/^- //')
 
 print_package() {
     local package_name="$1"; shift
@@ -110,7 +110,7 @@ for package in "${packages[@]}"; do
 
     # Get OS's
     for available_os in "${available_oss[@]}"; do
-        if ! ( ! output=$(yq ".packages.$package.$available_os" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ] ); then
+        if ! ( ! output=$(yq ".packages.$package.$available_os" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ] ); then
             package_oss+=("$available_os")
         fi
     done

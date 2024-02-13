@@ -2,11 +2,11 @@ TEST_FRAMEWORK_DIR := ./test_framework
 TESTS :=  check_test deps_test install_test list_test
 
 test:
-	bin/t $(TESTS)
+	DFM_YAML=./packages.yaml scripts/t $(TESTS)
 t:
-	bin/t $(TESTS)
+	DFM_YAML=./packages.yaml scripts/t $(TESTS)
 
 t_test:
-	bin/t t_test
+	DFM_YAML=./packages.yaml scripts/t t_test
 
 .PHONY: test t test_framework_test

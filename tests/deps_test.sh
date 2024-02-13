@@ -15,7 +15,7 @@ declare -A t=(
     [before_test]=""
     [test]="bin/dfm deps pk1010101"
     [after_test]=""
-    [expected_output]="Package 'pk1010101' is not defined in 'packages.yaml'."
+    [expected_output]="Package 'pk1010101' is not defined in '$DFM_YAML'."
     [expected_status]=1
 ); run_test t
 

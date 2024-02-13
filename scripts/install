@@ -33,26 +33,26 @@ validate_package() {
     local error=false
 
     # Validate if package is defined
-    if ! output=$(yq ".packages.$package" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; then
-        ! $s_flag && echo "Package '$package' is not defined in '$yaml_file'."
+    if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        ! $s_flag && echo "Package '$package' is not defined in '$DFM_YAML'."
         error=true
     fi
 
     # Validate if OS is defined
-    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
-        ! $s_flag && echo "Package's '$package' OS '$os' is not defined in '$yaml_file'."
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Package's '$package' OS '$os' is not defined in '$DFM_YAML'."
         error=true
     fi
 
     # Validate if 'check' is defined
-    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.check" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
-        ! $s_flag && echo "Missing 'check' entry on 'packages.$package.$os' in '$yaml_file'."
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.check" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Missing 'check' entry on 'packages.$package.$os' in '$DFM_YAML'."
         error=true
     fi
 
     # Validate if 'install' is defined
-    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.install" < "$yaml_file") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
-        ! $s_flag && echo "Missing 'install' entry on 'packages.$package.$os' in '$yaml_file'."
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.install" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Missing 'install' entry on 'packages.$package.$os' in '$DFM_YAML'."
         error=true
     fi
 
@@ -88,7 +88,7 @@ install_package() {
         return
     fi
 
-    install=$(yq ".packages.$package.$os.install" < "$yaml_file")
+    install=$(yq ".packages.$package.$os.install" < "$DFM_YAML")
 
     if ! install_output=$(eval "$install"); then 
         ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"

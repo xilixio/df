@@ -7,7 +7,7 @@ declare -A t=(
     [before_test]=""
     [test]="bin/dfm check pkX"
     [after_test]=""
-    [expected_output]="Package 'pkX' is not defined in 'packages.yaml'."
+    [expected_output]="Package 'pkX' is not defined in '$DFM_YAML'."
     [expected_status]=1
 ); run_test t
 
@@ -16,7 +16,7 @@ declare -A t=(
     [before_test]=""
     [test]="bin/dfm check pk_no_os"
     [after_test]=""
-    [expected_output]="Package's 'pk_no_os' OS '$os' is not defined in 'packages.yaml'."
+    [expected_output]="Package's 'pk_no_os' OS '$os' is not defined in '$DFM_YAML'."
     [expected_status]=1
 ); run_test t
 
@@ -25,7 +25,7 @@ declare -A t=(
     [before_test]=""
     [test]="bin/dfm check pk_no_check"
     [after_test]=""
-    [expected_output]="Missing 'check' entry on 'packages.pk_no_check.$os' in 'packages.yaml'."
+    [expected_output]="Missing 'check' entry on 'packages.pk_no_check.$os' in '$DFM_YAML'."
     [expected_status]=1
 ); run_test t
 

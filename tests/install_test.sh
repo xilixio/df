@@ -10,7 +10,7 @@ declare -A t=(
     [test]="bin/dfm install pkNoNo -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pkNoNo 
-Package 'pkNoNo' is not defined in 'packages.yaml'.
+Package 'pkNoNo' is not defined in '$DFM_YAML'.
 EOF
 )
     [expected_status]=1
@@ -46,7 +46,7 @@ declare -A t=(
     [test]="bin/dfm install pk_no_os -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_no_os 
-Package's 'pk_no_os' OS '$os' is not defined in 'packages.yaml'.
+Package's 'pk_no_os' OS '$os' is not defined in '$DFM_YAML'.
 EOF
 )
     [expected_status]=1
@@ -59,36 +59,36 @@ declare -A t=(
     [expected_status]=1
 ); run_test t
 declare -A t=(
-    [description]="Throw if the 'check' entry is not defined in 'packages.yaml'"
+    [description]="Throw if the 'check' entry is not defined in '$DFM_YAML'"
     [test]="bin/dfm install pk_no_check -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_no_check 
-Missing 'check' entry on 'packages.pk_no_check.$os' in 'packages.yaml'.
+Missing 'check' entry on 'packages.pk_no_check.$os' in '$DFM_YAML'.
 EOF
 )
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
-    [description]="Silent throw if the 'check' entry is not defined in 'packages.yaml'"
+    [description]="Silent throw if the 'check' entry is not defined in '$DFM_YAML'"
     [test]="bin/dfm install pk_no_check -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
-    [description]="Throw if the 'install' entry is not defined in 'packages.yaml'"
+    [description]="Throw if the 'install' entry is not defined in '$DFM_YAML'"
     [test]="bin/dfm install pk_no_install -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_no_install 
-Missing 'install' entry on 'packages.pk_no_install.$os' in 'packages.yaml'.
+Missing 'install' entry on 'packages.pk_no_install.$os' in '$DFM_YAML'.
 EOF
 )
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
-    [description]="Silent throw if the 'install' entry is not defined in 'packages.yaml'"
+    [description]="Silent throw if the 'install' entry is not defined in '$DFM_YAML'"
     [test]="bin/dfm install pk_no_install -y -s"
     [expected_output]=""
     [expected_status]=1
@@ -222,9 +222,9 @@ About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install p
 Successfully installed package 'pk3'.
 Successfully installed package 'pk2'.
 Successfully installed package 'pk1'.
-Missing 'check' entry on 'packages.pk_no_check.Linux' in 'packages.yaml'.
+Missing 'check' entry on 'packages.pk_no_check.Linux' in '$DFM_YAML'.
 Package 'pk_no_check' has validation errors, ignoring.
-Missing 'install' entry on 'packages.pk_no_install.Linux' in 'packages.yaml'.
+Missing 'install' entry on 'packages.pk_no_install.Linux' in '$DFM_YAML'.
 Package 'pk_no_install' has validation errors, ignoring.
 A cyclic dependency involving 'pkCD1' was found in the path '<root>->pkCD1->pkCD2->pkCD1'.
 Package 'pkCD1' has validation errors, ignoring.
