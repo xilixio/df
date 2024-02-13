@@ -7,21 +7,21 @@ rm /tmp/pk{1,2,3}.tmp >/dev/null 2>&1
 
 declare -A t=(
     [description]="Throw if -a and -o are set"
-    [test]="bin/df list -a -o Linux"
+    [test]="bin/dfm list -a -o Linux"
     [expected_output]="Cannot set -a with -o or -s"
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="Throw if -a and -s are set"
-    [test]="bin/df list -a -s true"
+    [test]="bin/dfm list -a -s true"
     [expected_output]="Cannot set -a with -o or -s"
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="List all packages defined in packages.yaml"
-    [test]="bin/df list -a"
+    [test]="bin/dfm list -a"
     [expected_output]=$(cat <<EOF
 pk1
 pk2
@@ -40,7 +40,7 @@ EOF
 
 declare -A t=(
     [description]="List packages for the current OS ($os)"
-    [test]="bin/df list"
+    [test]="bin/dfm list"
     [expected_output]=$(cat <<EOF
 pk1
 pk2
@@ -58,7 +58,7 @@ EOF
 declare -A t=(
     [description]="List packages for a specific OS (Darwin)"
     [before_test]=""
-    [test]="bin/df list -o Darwin"
+    [test]="bin/dfm list -o Darwin"
     [after_test]=""
     [expected_output]=$(cat <<EOF
 pk1
@@ -77,7 +77,7 @@ EOF
 declare -A t=(
     [description]="List all installed packages for the current OS ($os)"
     [before_test]="touch /tmp/pk1.tmp"
-    [test]="bin/df list -s true"
+    [test]="bin/dfm list -s true"
     [after_test]="rm /tmp/pk1.tmp"
     [expected_output]=$(cat <<EOF
 pk1
@@ -89,7 +89,7 @@ EOF
 declare -A t=(
     [description]="List all packages NOT installed for the current OS ($os)"
     [before_test]="touch /tmp/pk1.tmp"
-    [test]="bin/df list -s false"
+    [test]="bin/dfm list -s false"
     [after_test]="rm /tmp/pk1.tmp"
     [expected_output]=$(cat <<EOF
 pk2
@@ -107,7 +107,7 @@ EOF
 declare -A t=(
     [description]="List all installed packages for a specific OS (Darwin)"
     [before_test]="touch /tmp/pk2.tmp"
-    [test]="bin/df list -s true -o Darwin"
+    [test]="bin/dfm list -s true -o Darwin"
     [after_test]="rm /tmp/pk2.tmp"
     [expected_output]=$(cat <<EOF
 pk2
@@ -119,7 +119,7 @@ EOF
 declare -A t=(
     [description]="List all packages NOT installed for a specific OS (Darwin)"
     [before_test]="touch /tmp/pk2.tmp"
-    [test]="bin/df list -s false -o Darwin"
+    [test]="bin/dfm list -s false -o Darwin"
     [after_test]="rm /tmp/pk2.tmp"
     [expected_output]=$(cat <<EOF
 pk1
@@ -137,7 +137,7 @@ EOF
 declare -A t=(
     [description]="List all packages with info"
     [before_test]="touch /tmp/pk2.tmp"
-    [test]="bin/df list -i -a"
+    [test]="bin/dfm list -i -a"
     [after_test]="rm /tmp/pk2.tmp"
     [expected_output]=$(cat <<EOF
 pk1 Linux,Darwin not_installed
@@ -158,7 +158,7 @@ EOF
 declare -A t=(
     [description]="List installed packages with info for current OS (Linux)"
     [before_test]="touch /tmp/pk2.tmp"
-    [test]="bin/df list -i -s true"
+    [test]="bin/dfm list -i -s true"
     [after_test]="rm /tmp/pk2.tmp"
     [expected_output]=$(cat <<EOF
 pk2 Linux,Darwin installed
@@ -170,7 +170,7 @@ EOF
 declare -A t=(
     [description]="List NOT installed packages with info for current OS (Linux)"
     [before_test]="touch /tmp/pk2.tmp"
-    [test]="bin/df list -i -s false"
+    [test]="bin/dfm list -i -s false"
     [after_test]="rm /tmp/pk2.tmp"
     [expected_output]=$(cat <<EOF
 pk1 Linux,Darwin not_installed

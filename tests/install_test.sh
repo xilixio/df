@@ -7,7 +7,7 @@ rm /tmp/pk{1,2,3}.tmp >/dev/null 2>&1
 
 declare -A t=(
     [description]="Throw if package doesn't exist."
-    [test]="bin/df install pkNoNo -y"
+    [test]="bin/dfm install pkNoNo -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pkNoNo 
 Package 'pkNoNo' is not defined in 'packages.yaml'.
@@ -18,14 +18,14 @@ EOF
 
 declare -A t=(
     [description]="Silent throw if package doesn't exist."
-    [test]="bin/df install pkNoNo -y -s"
+    [test]="bin/dfm install pkNoNo -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="Throw if package has cyclic dependencies"
-    [test]="bin/df install pkCD1 -y"
+    [test]="bin/dfm install pkCD1 -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pkCD1 
 A cyclic dependency involving 'pkCD1' was found in the path '<root>->pkCD1->pkCD2->pkCD1'.
@@ -36,14 +36,14 @@ EOF
 
 declare -A t=(
     [description]="Silent throw if package has cyclic dependencies"
-    [test]="bin/df install pkCD1 -y -s"
+    [test]="bin/dfm install pkCD1 -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="Throw if the current OS is not installed"
-    [test]="bin/df install pk_no_os -y"
+    [test]="bin/dfm install pk_no_os -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_no_os 
 Package's 'pk_no_os' OS '$os' is not defined in 'packages.yaml'.
@@ -54,13 +54,13 @@ EOF
 
 declare -A t=(
     [description]="Silent throw if the current OS is not installed"
-    [test]="bin/df install pk_no_os -y -s"
+    [test]="bin/dfm install pk_no_os -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 declare -A t=(
     [description]="Throw if the 'check' entry is not defined in 'packages.yaml'"
-    [test]="bin/df install pk_no_check -y"
+    [test]="bin/dfm install pk_no_check -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_no_check 
 Missing 'check' entry on 'packages.pk_no_check.$os' in 'packages.yaml'.
@@ -71,14 +71,14 @@ EOF
 
 declare -A t=(
     [description]="Silent throw if the 'check' entry is not defined in 'packages.yaml'"
-    [test]="bin/df install pk_no_check -y -s"
+    [test]="bin/dfm install pk_no_check -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="Throw if the 'install' entry is not defined in 'packages.yaml'"
-    [test]="bin/df install pk_no_install -y"
+    [test]="bin/dfm install pk_no_install -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_no_install 
 Missing 'install' entry on 'packages.pk_no_install.$os' in 'packages.yaml'.
@@ -89,14 +89,14 @@ EOF
 
 declare -A t=(
     [description]="Silent throw if the 'install' entry is not defined in 'packages.yaml'"
-    [test]="bin/df install pk_no_install -y -s"
+    [test]="bin/dfm install pk_no_install -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="Throw if the package installation fails"
-    [test]="bin/df install pk_install_fail -y"
+    [test]="bin/dfm install pk_install_fail -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk_install_fail 
 Failed installing package 'pk_install_fail'. Error: Some error.
@@ -107,14 +107,14 @@ EOF
 
 declare -A t=(
     [description]="Silent throw if the package installation fails"
-    [test]="bin/df install pk_install_fail -y -s"
+    [test]="bin/dfm install pk_install_fail -y -s"
     [expected_output]=""
     [expected_status]=1
 ); run_test t
 
 declare -A t=(
     [description]="Install package with no dependencies"
-    [test]="bin/df install pk3 -y"
+    [test]="bin/dfm install pk3 -y"
     [after_test]="rm /tmp/pk3.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk3 
@@ -126,7 +126,7 @@ EOF
 
 declare -A t=(
     [description]="Silent install package with no dependencies"
-    [test]="bin/df install pk3 -y -s"
+    [test]="bin/dfm install pk3 -y -s"
     [after_test]="rm /tmp/pk3.tmp || true"
     [expected_output]=""
     [expected_status]=0
@@ -135,7 +135,7 @@ declare -A t=(
 declare -A t=(
     [description]="Skip if package has been installed"
     [before_test]="touch /tmp/pk3.tmp"
-    [test]="bin/df install pk3 -y"
+    [test]="bin/dfm install pk3 -y"
     [after_test]="rm /tmp/pk3.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk3 
@@ -148,7 +148,7 @@ EOF
 declare -A t=(
     [description]="Silent skip if package has been installed"
     [before_test]="touch /tmp/pk3.tmp"
-    [test]="bin/df install pk3 -y -s"
+    [test]="bin/dfm install pk3 -y -s"
     [after_test]="rm /tmp/pk3.tmp || true"
     [expected_output]=""
     [expected_status]=0
@@ -156,10 +156,10 @@ declare -A t=(
 
 declare -A t=(
     [description]="Install package and its dependencies"
-    [test]="bin/df install pk1 -y && 
-            bin/df check pk1 -s && \
-            bin/df check pk2 -s && \
-            bin/df check pk3 -s"
+    [test]="bin/dfm install pk1 -y && 
+            bin/dfm check pk1 -s && \
+            bin/dfm check pk2 -s && \
+            bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk1 
@@ -173,10 +173,10 @@ EOF
 
 declare -A t=(
     [description]="Silent install package and its dependencies"
-    [test]="bin/df install pk1 -s -y && 
-            bin/df check pk1 -s && \
-            bin/df check pk2 -s && \
-            bin/df check pk3 -s"
+    [test]="bin/dfm install pk1 -s -y && 
+            bin/dfm check pk1 -s && \
+            bin/dfm check pk2 -s && \
+            bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=""
     [expected_status]=0
@@ -184,10 +184,10 @@ declare -A t=(
 
 declare -A t=(
     [description]="Install multiple package and its dependencies"
-    [test]="bin/df install pk3 pk1 -y && 
-            bin/df check pk1 -s && \
-            bin/df check pk2 -s && \
-            bin/df check pk3 -s"
+    [test]="bin/dfm install pk3 pk1 -y && 
+            bin/dfm check pk1 -s && \
+            bin/dfm check pk2 -s && \
+            bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk3 pk1 
@@ -201,10 +201,10 @@ EOF
 
 declare -A t=(
     [description]="Silent install multiple package and its dependencies"
-    [test]="bin/df install pk3 pk1 -s -y && 
-            bin/df check pk1 -s && \
-            bin/df check pk2 -s && \
-            bin/df check pk3 -s"
+    [test]="bin/dfm install pk3 pk1 -s -y && 
+            bin/dfm check pk1 -s && \
+            bin/dfm check pk2 -s && \
+            bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=""
     [expected_status]=0
@@ -212,10 +212,10 @@ declare -A t=(
 
 declare -A t=(
     [description]="Install all and ignore errors"
-    [test]="bin/df install -y -i && 
-            bin/df check pk1 -s && \
-            bin/df check pk2 -s && \
-            bin/df check pk3 -s"
+    [test]="bin/dfm install -y -i && 
+            bin/dfm check pk1 -s && \
+            bin/dfm check pk2 -s && \
+            bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail 
@@ -241,10 +241,10 @@ EOF
 
 declare -A t=(
     [description]="Silent install all and ignore errors"
-    [test]="bin/df install -y -i -s &&
-            bin/df check pk1 -s && \
-            bin/df check pk2 -s && \
-            bin/df check pk3 -s"
+    [test]="bin/dfm install -y -i -s &&
+            bin/dfm check pk1 -s && \
+            bin/dfm check pk2 -s && \
+            bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=""
     [expected_status]=0
