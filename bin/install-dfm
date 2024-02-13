@@ -13,6 +13,11 @@ os_name="$(uname -s)"
 
 case "$os_name" in
     Linux)
+        # Check for sudo access
+        if [ "$(id -u)" != "0" ]; then
+            exec sudo "$0" "$@"
+        fi
+
         if ! command -v yq &>/dev/null; then
             if ! command -v wget &>/dev/null; then
                 apt-get update && apt-get install -y wget
