@@ -14,16 +14,16 @@ os_name="$(uname -s)"
 case "$os_name" in
     Linux)
         # Check for sudo access
-        if [ "$(id -u)" != "0" ]; then
-            echo "Please run the installer using sudo"
-            exit 1
-        fi
+        # if [ "$(id -u)" != "0" ]; then
+        #     echo "Please run the installer using sudo"
+        #     exit 1
+        # fi
 
         if ! command -v yq &>/dev/null; then
             if ! command -v wget &>/dev/null; then
                 echo "Installing wget..."
                 
-                if ! (apt-get update && apt-get install -y wget); then
+                if ! (sudo apt-get update && sudo apt-get install -y wget); then
                     echo "Error installing wget. Aborting."
                     exit 1
                 fi
@@ -31,7 +31,7 @@ case "$os_name" in
 
             echo "Installing yq..."
             
-            if ! (wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && chmod +x /usr/local/bin/yq); then
+            if ! (sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && sudo chmod +x /usr/local/bin/yq); then
                 echo "Error installing yq. Aborting."
                 exit 1
             fi
@@ -65,12 +65,16 @@ esac
 # Clone dfm
 dfm_dir="$HOME/.dfm"
 
+echo "Installing dfm in '$dfm_dir'..."
+
 if [ -d "$dfm_dir" ]; then
     echo ".dfm directory already exists, aborting."
     exit 1
 fi
 
-if ! git clone https://github.com/xilixio/df.git "$dfm_dir" 2>/dev/null; then
+echo "Cloning repository..."
+
+if ! (git clone https://github.com/xilixio/df.git "$dfm_dir"); then
     echo "Failed installing dfm. Error: Could not clone the repository."
     exit 1
 fi
@@ -90,9 +94,11 @@ case "$SHELL" in
         ;;
 esac
 
-if ! echo "export PATH=\"\$PATH:$dfm_dir/bin\"" >> "$shell_config_file"; then
+echo "Updating PATH in shell config '$shell_config_file'..."
+
+if ! (echo "export PATH=\"\$PATH:$dfm_dir/bin\"" >> "$shell_config_file"); then
     echo "Failed installing dfm. Error: Could not update shell configuration."
     exit 1
 fi
 
-echo "Successfully installed dfm."
+echo "Successfully installed dfm. Please reload the shell."
