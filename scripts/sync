@@ -1,18 +1,14 @@
 #!/bin/bash
 
-cd "$DFM_DOTFILES"
+machine_name=$(hostname)
+os=$(uname -s)
+username=$USER
+unixtime=$(date +%s)
+commit="${machine_name}-${os}-${username}-${unixtime}"
 
-if [[ -n $(dfm status) ]]; then
-    machine_name=$(hostname)
-    os=$(uname -s)
-    username=$USER
-    unixtime=$(date +%s)
-    commit="${machine_name}-${os}-${username}-${unixtime}"
-
-    git stash
-    git pull
-    git stash pop
-    git add -A
-    git commit -m "[push] $commit"
-    git push
-fi
+git stash
+git pull
+git stash pop
+git add -A
+git commit -m "[push] $commit"
+git push
