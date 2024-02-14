@@ -6,6 +6,8 @@ username=$USER
 unixtime=$(date +%s)
 commit="${machine_name}-${os}-${username}-${unixtime}"
 
+cd $DFM_DOTFILES
+
 git stash
 git pull
 git stash pop
