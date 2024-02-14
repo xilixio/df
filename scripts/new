@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <package>"
+    exit 1
+fi
+
+package="$1"
+
+if [ "$(yq eval ".packages | has(\"$package\")" < "$DFM_YAML")" = "true" ]; then
+    echo "The package '$package' already exists in '$DFM_YAML'."
+    exit 1
+fi
+
+contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$DFM_YAML") && echo "$contents" > "$DFM_YAML"
+echo "Added '$package' to '$DFM_YAML'."
