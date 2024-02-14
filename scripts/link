@@ -1,0 +1,51 @@
+#!/bin/bash
+
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 <package> <sourcefile> <targetfile>"
+    exit 1
+fi
+
+package="$1"
+sourcefile="$2"
+targetfile="$3"
+
+if ! output=$(yq ".packages.$package" < "$DFM_YAML" 2>/dev/null) || [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Package '$package' is not defined in '$DFM_YAML'."
+    exit 1
+fi
+
+if [ ! -e "$sourcefile" ]; then
+    echo "Source file '$sourcefile' doesn't exist."
+    exit 1
+fi
+
+if dfm islinked "$package" "$targetfile" &> /dev/null; then
+    echo "Target file '$targetfile' is already linked."
+    exit 1
+fi
+
+package_path="$DFM_DOTFILES/packages/$package"
+
+if [ ! -d "$package_path" ]; then
+    echo "Package '$package' doesn't have a corresponding folder 'packages/$package'"
+    exit 1
+fi
+
+sourcefile_realpath=$(realpath "$sourcefile")
+
+if [[ "$sourcefile_realpath" != "$package_path"* ]]; then
+    echo "Source file's real path '$sourcefile_realpath' is not withn the package's path '$package_path'"
+    exit 1
+fi
+
+if [ -e "$targetfile" ]; then
+    unixtime=$(date +%s)
+    backup_filename="$(basename "$targetfile").bak-$unixtime"
+    backup_path="$(dirname "$targetfile")/$backup_filename"
+    echo "[INFO] Target file '$targetfile' already exists. Creating backup in '$backup_path'" 
+
+    mv "$targetfile" "$backup_path"
+fi
+
+
+ln -s "$sourcefile" "$targetfile"
