@@ -3,7 +3,7 @@
 package="$1"; shift
 
 if [ "$#" -eq 0 ]; then
-    echo "Please specify at least one path"
+    echo "Usage: track <package> <paths...>"
     exit 1
 fi
 
