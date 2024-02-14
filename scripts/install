@@ -76,6 +76,7 @@ install_package() {
     packages_seen["$package"]=true
 
     ! $y_flag && read -rp "About to install package '$package'. Do you want to continue? (y/n): " user_input
+    ! $s_flag && echo "Installing package '$package'..."
 
     if ! [[ "$user_input" == "y" ]]; then
         ! $s_flag && echo "Aborting..."

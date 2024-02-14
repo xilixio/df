@@ -8,7 +8,7 @@ commit="${machine_name}-${os}-${username}-${unixtime}"
 
 cd $DFM_DOTFILES
 
-git stash -a
+git stash 
 git pull
 git stash pop
 git add -A
