@@ -1,0 +1,59 @@
+#!/bin/bash
+
+package="$1"; shift
+
+if [ "$#" -eq 0 ]; then
+    echo "Please specify at least one path"
+    exit 1
+fi
+
+file_or_dir_paths=()
+
+for file_or_dir in "$@"; do
+    file_or_dir_paths+=("$file_or_dir")
+done
+
+# Validate if package is defined
+output=$(yq ".packages.$package" < "$DFM_YAML" 2>/dev/null)
+
+if [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Package '$package' is not defined in '$DFM_YAML'."
+    exit 1
+fi
+
+# Create package folder if it doesn't exist
+package_dir="$DFM_DOTFILES/packages/$package"
+
+if [ ! -d "$package_dir" ]; then
+    echo "Creating '$package/' in '$DFM_DOTFILES/packages/'"
+    mkdir -p "$package_dir"
+fi
+
+# Track file_or_dir_paths
+for file_or_dir in "${file_or_dir_paths[@]}"; do
+    # Check if the path (file or directory) exists
+    if [ ! -f "$file_or_dir" ] && [ ! -d "$file_or_dir" ]; then
+        echo "'$file_or_dir' is not a valid file or directory."
+    fi 
+
+    # Move file or dir to package dir
+    basename=$(basename "$file_or_dir")
+    tracked_file_or_dir="$DFM_DOTFILES/packages/$package/$basename"
+
+    if { [ -f "$tracked_file_or_dir" ] || [ -d "$tracked_file_or_dir" ]; } && \
+       { [ -L "$file_or_dir" ] && [[ $(realpath "$file_or_dir") = "$tracked_file_or_dir" ]]; }; then
+        echo "INFO: Already tracking '$basename' under '$tracked_file_or_dir'"
+        continue
+    fi 
+
+    # Symlink
+    if ! mv "$file_or_dir" "$tracked_file_or_dir"; then
+        echo "Error moving '$basename' to '$tracked_file_or_dir'."
+        exit 1
+    fi
+
+    if ! ln -s "$tracked_file_or_dir" "$file_or_dir"; then
+        echo "Error creating symlink from '$tracked_file_or_dir' to '$file_or_dir'."
+        exit 1
+    fi
+done

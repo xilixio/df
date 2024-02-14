@@ -1,5 +1,5 @@
 TEST_FRAMEWORK_DIR := ./test_framework
-TESTS :=  check_test deps_test install_test list_test new_test
+TESTS :=  check_test deps_test install_test list_test new_test track_test
 
 test:
 	DFM_YAML=./tests/packages.yaml scripts/t $(TESTS)
