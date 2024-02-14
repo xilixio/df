@@ -105,8 +105,24 @@ if ! (echo "export DFM_YAML=\"\$DFM_DOTFILES/packages.yaml\"" >> "$shell_config_
     exit 1
 fi
 
-echo "Reloading shell config '$shell_config_file'..."
-source "$shell_config_file"
+# Set up initial gitconfig file if it doesn't exist
+gitconfig_file="$HOME/.gitconfig"
+
+if [ ! -f "$gitconfig_file" ]; then
+    echo "The .gitconfig file does not exist. Creating one now."
+
+    read -rp "Enter your name: " name
+    read -rp "Enter your email: " email
+
+    {
+        echo "[user]"
+        echo "    name = $name"
+        echo "    email = $email"
+    } > "$gitconfig_file"
+
+    echo ".gitconfig file has been created."
+fi
+
 
 echo ""
-echo "Successfully installed dfm."
+echo "Successfully installed dfm. Please reload your shell."
