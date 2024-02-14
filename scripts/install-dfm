@@ -59,18 +59,13 @@ esac
 # Clone dfm
 dfm_dir="$HOME/.dfm"
 
-echo "Installing dfm in '$dfm_dir'..."
+if [ ! -d "$dfm_dir" ]; then
+    echo "Installing dfm in '$dfm_dir'..."
 
-if [ -d "$dfm_dir" ]; then
-    echo ".dfm directory already exists, aborting."
-    exit 1
-fi
-
-echo "Cloning repository..."
-
-if ! (git clone https://github.com/xilixio/df.git "$dfm_dir"); then
-    echo "Failed installing dfm. Error: Could not clone the repository."
-    exit 1
+    if ! (git clone https://github.com/xilixio/df.git "$dfm_dir"); then
+        echo "Failed installing dfm. Error: Could not clone the repository."
+        exit 1
+    fi
 fi
 
 # Add dfm/bin to PATH
@@ -88,21 +83,28 @@ case "$SHELL" in
         ;;
 esac
 
-echo "Updating PATH in shell config '$shell_config_file'..."
+echo "Configuring shell config '$shell_config_file'..."
 
-if ! (echo "export PATH=\"\$PATH:$dfm_dir/bin\"" >> "$shell_config_file"); then
-    echo "Failed installing dfm. Error: Could not update shell configuration."
-    exit 1
+if ! grep -q "$dfm_dir" "$shell_config_file"; then
+    if ! (echo "export PATH=\"\$PATH:$dfm_dir/bin\"" >> "$shell_config_file"); then
+        echo "Failed installing dfm. Error: Could not update shell configuration."
+        exit 1
+    fi
 fi
 
-if ! (echo "export DFM_DOTFILES=\"\$HOME/.dotfiles\"" >> "$shell_config_file"); then
-    echo "Failed installing dfm. Error: Could not update shell configuration."
-    exit 1
+
+if ! grep -q "export DFM_DOTFILES" "$shell_config_file"; then
+    if ! (echo "export DFM_DOTFILES=\"\$HOME/.dotfiles\"" >> "$shell_config_file"); then
+        echo "Failed installing dfm. Error: Could not update shell configuration."
+        exit 1
+    fi
 fi
 
-if ! (echo "export DFM_YAML=\"\$DFM_DOTFILES/packages.yaml\"" >> "$shell_config_file"); then
-    echo "Failed installing dfm. Error: Could not update shell configuration."
-    exit 1
+if ! grep -q "export DFM_YAML" "$shell_config_file"; then
+    if ! (echo "export DFM_YAML=\"\$DFM_DOTFILES/packages.yaml\"" >> "$shell_config_file"); then
+        echo "Failed installing dfm. Error: Could not update shell configuration."
+        exit 1
+    fi
 fi
 
 # Set up initial gitconfig file if it doesn't exist
