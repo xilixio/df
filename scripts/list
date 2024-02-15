@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$DFM_SUBCOMMAND" ]; then
+    echo "Subcommand $0 should be called using 'dfm' command."
+    exit 1
+fi
+
 # Parse arguments
 a_flag=false # Show all packages
 o_flag="" # What OS to show

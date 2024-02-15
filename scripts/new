@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$DFM_SUBCOMMAND" ]; then
+    echo "Subcommand $0 should be called using 'dfm' command."
+    exit 1
+fi
+
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <package>"
     exit 1

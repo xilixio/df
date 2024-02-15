@@ -1,3 +1,8 @@
 #!/bin/bash
 
+if [ -z "$DFM_SUBCOMMAND" ]; then
+    echo "Subcommand $0 should be called using 'dfm' command."
+    exit 1
+fi
+
 dfm pull && dfm push

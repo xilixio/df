@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$DFM_SUBCOMMAND" ]; then
+    echo "Subcommand $0 should be called using 'dfm' command."
+    exit 1
+fi
+
 cd "$DFM_DOTFILES" || exit 1
 
 if ! git pull --rebase --autostash; then

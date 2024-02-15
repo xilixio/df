@@ -37,4 +37,5 @@ fi
 
 # Source the subcommand script and forward the remaining arguments
 # Variables declared in this runner script will be available to the sourced subcommand script
+export DFM_SUBCOMMAND=true
 source "$subcommand_script" "$@"
