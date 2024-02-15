@@ -13,6 +13,7 @@ declare -A t=(
     [test]="bin/dfm new test && cat \"$DFM_YAML\""
     [expected_output]="$(cat <<EOF
 Added 'test' to '$DFM_YAML'.
+Created folder '$DFM_DOTFILES/packages/test'.
 packages:
   test:
     Linux:

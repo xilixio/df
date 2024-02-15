@@ -19,3 +19,5 @@ fi
 
 contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$DFM_YAML") && echo "$contents" > "$DFM_YAML"
 echo "Added '$package' to '$DFM_YAML'."
+
+mkdir -p "$DFM_DOTFILES/packages/$package" && echo "Created folder '$DFM_DOTFILES/packages/$package'.";
