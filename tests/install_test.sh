@@ -227,7 +227,7 @@ declare -A t=(
             bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=$(cat <<EOF
-About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail test brew brew_packages
+About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail test brew brew_packages 
 Installing package 'pk3'...
 Successfully installed package 'pk3'.
 Installing package 'pk2'...
