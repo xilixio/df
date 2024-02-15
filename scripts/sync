@@ -6,34 +6,9 @@ username=$USER
 unixtime=$(date +%s)
 commit="${machine_name}-${os}-${username}-${unixtime}"
 
-cd $DFM_DOTFILES
+cd "$DFM_DOTFILES" || exit 1
 
-if ! git stash; then
-    echo "Error when stashing changes, aborting."
-    exit 1
-fi
-
-if ! git pull --rebase; then
-    echo "Error when pulling changes, aborting."
-    exit 1
-fi
-
-if ! git stash pop; then
-    echo "Error when popping the stash, aborting."
-    exit 1
-fi
-
-if ! git add -A; then
-    echo "Error when staging changes, aborting."
-    exit 1
-fi
-
-if ! git commit -m "[push] $commit"; then
-    echo "Error when committing changes, aborting."
-    exit 1
-fi
-
-if ! git push; then
-    echo "Error when pushing commit, aborting."
-    exit 1
-fi
+git pull --rebase --autostash || exit 1
+git add -A || exit 1
+git commit -m "[push] $commit" || exit 1
+git push || exit 1
