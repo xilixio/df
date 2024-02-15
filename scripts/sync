@@ -13,7 +13,7 @@ if ! git stash; then
     exit 1
 fi
 
-if ! git pull; then
+if ! git pull --rebase; then
     echo "Error when pulling changes, aborting."
     exit 1
 fi
