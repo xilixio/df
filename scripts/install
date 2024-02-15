@@ -91,7 +91,7 @@ install_package() {
 
     install=$(yq ".packages.$package.$os.install" < "$DFM_YAML")
 
-    if ! install_output=$(eval "$install"); then 
+    if ! install_output=$(eval "$install" 2>&1 >/dev/null); then 
         ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
 
         if [[ "$i_flag" = true ]]; then
