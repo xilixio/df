@@ -96,7 +96,7 @@ install_package() {
 
     install=$(yq ".packages.$package.$os.install" < "$DFM_YAML")
 
-    if ! install_output=$(eval "$install" 2>&1 >/dev/null); then 
+    if ! install_output=$(eval "$install" 2>&1); then 
         ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
 
         if [[ "$i_flag" = true ]]; then
@@ -111,9 +111,9 @@ install_package() {
 }
 
 walk_deps_and_install() {
-    local package=$1
+    local package="$1"
     local path="$2"
-    local new_path="${path}->${package}"
+    local new_path="${path}->'${package}'"
 
     validate_package "$package"
 
@@ -122,8 +122,7 @@ walk_deps_and_install() {
         return
     fi
 
-
-    if [[ "$path" =~ "->${package}" ]]; then
+    if [[ "$path" =~ "->'${package}'" ]]; then
         ! $s_flag && echo "A cyclic dependency involving '$package' was found in the path '$new_path'."
 
         if [[ "$i_flag" = true ]]; then

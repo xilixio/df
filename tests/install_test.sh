@@ -28,7 +28,7 @@ declare -A t=(
     [test]="bin/dfm install pkCD1 -y"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pkCD1 
-A cyclic dependency involving 'pkCD1' was found in the path '<root>->pkCD1->pkCD2->pkCD1'.
+A cyclic dependency involving 'pkCD1' was found in the path '<root>->'pkCD1'->'pkCD2'->'pkCD1''.
 EOF
 )
     [expected_status]=1
@@ -238,16 +238,16 @@ Missing 'check' entry on 'packages.pk_no_check.Linux' in '$DFM_YAML'.
 Package 'pk_no_check' has validation errors, ignoring.
 Missing 'install' entry on 'packages.pk_no_install.Linux' in '$DFM_YAML'.
 Package 'pk_no_install' has validation errors, ignoring.
-A cyclic dependency involving 'pkCD1' was found in the path '<root>->pkCD1->pkCD2->pkCD1'.
+A cyclic dependency involving 'pkCD1' was found in the path '<root>->'pkCD1'->'pkCD2'->'pkCD1''.
 Package 'pkCD1' has validation errors, ignoring.
 Installing package 'pkCD2'...
 Successfully installed package 'pkCD2'.
 Installing package 'pkCD1'...
 Successfully installed package 'pkCD1'.
-A cyclic dependency involving 'pkCD2' was found in the path '<root>->pkCD2->pkCD1->pkCD2'.
+A cyclic dependency involving 'pkCD2' was found in the path '<root>->'pkCD2'->'pkCD1'->'pkCD2''.
 Package 'pkCD2' has validation errors, ignoring.
 Installing package 'pk_install_fail'...
-Failed installing package 'pk_install_fail'. Error: Some error.
+Failed installing package 'pk_insta_fail'. Error: Some error.
 Package 'pk_install_fail' has validation errors, ignoring.
 EOF
     )
@@ -261,6 +261,13 @@ declare -A t=(
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [expected_output]=""
+    [expected_status]=0
+); run_test t
+
+declare -A t=(
+    [description]="Correctly filter out package name substrings when detecting CD"
+    [test]="bin/dfm install brew -y -s"
     [expected_output]=""
     [expected_status]=0
 ); run_test t

@@ -60,10 +60,10 @@ packages:
   pk_install_fail:
     deps:
     Linux:
-      install: "echo \"Some error.\"; exit 1"
+      install: 'echo "Some error." && exit 1'
       check: "false"
     Darwin:
-      install: "echo \"Some error.\"; exit 1"
+      install: 'echo "Some error." && exit 1'
       check: "false"
   test:
     Linux:
@@ -72,3 +72,19 @@ packages:
     Darwin:
       install: null
       check: null
+  brew:
+    Linux:
+      install: true
+      check: false
+    Darwin:
+      install: true
+      check: false
+  brew_packages:
+    deps:
+      - brew
+    Linux:
+      install: true
+      check: false
+    Darwin:
+      install: tru nulle
+      check: false
