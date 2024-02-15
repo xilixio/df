@@ -24,16 +24,15 @@ if [ ! -L "$targetfile" ]; then
 fi
 
 targetfile_realpath=$(realpath "$targetfile")
-package_path="$DFM_DOTFILES/packages/$package"
-package_realpath=$(dirname "$(realpath "$package_path")")
+package_path=$(realpath "$DFM_DOTFILES")/packages/$package
 
 if [ ! -d "$package_path" ]; then
     echo "Error: Package '$package' doesn't have a corresponding folder 'packages/$package'"
     exit 1
 fi
 
-if [[ "$targetfile_realpath" != "$package_realpath"* ]]; then
-    echo "Error: Target file's real path '$targetfile_realpath' is not within the package's path '$package_realpath'."
+if [[ "$targetfile_realpath" != "$package_path"* ]]; then
+    echo "Error: Target file's real path '$targetfile_realpath' is not within the package's path '$package_path'."
     exit 1
 fi
 
