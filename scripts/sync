@@ -1,14 +1,3 @@
 #!/bin/bash
 
-machine_name=$(hostname)
-os=$(uname -s)
-username=$USER
-unixtime=$(date +%s)
-commit="${machine_name}-${os}-${username}-${unixtime}"
-
-cd "$DFM_DOTFILES" || exit 1
-
-git pull --rebase --autostash || exit 1
-git add -A || exit 1
-git commit -m "[push] $commit" || exit 1
-git push || exit 1
+dfm pull && dfm push
