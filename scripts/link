@@ -10,31 +10,34 @@ sourcefile="$2"
 targetfile="$3"
 
 if ! output=$(yq ".packages.$package" < "$DFM_YAML" 2>/dev/null) || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Package '$package' is not defined in '$DFM_YAML'."
-    exit 1
-fi
-
-if [ ! -e "$sourcefile" ]; then
-    echo "Source file '$sourcefile' doesn't exist."
-    exit 1
-fi
-
-if dfm islinked "$package" "$targetfile" &> /dev/null; then
-    echo "Target file '$targetfile' is already linked."
+    echo "Error: Package '$package' is not defined in '$DFM_YAML'."
     exit 1
 fi
 
 package_path="$DFM_DOTFILES/packages/$package"
 
 if [ ! -d "$package_path" ]; then
-    echo "Package '$package' doesn't have a corresponding folder 'packages/$package'"
+    echo "Error: Package '$package' doesn't have a corresponding folder 'packages/$package'."
     exit 1
 fi
 
-sourcefile_realpath=$(realpath "$sourcefile")
+sourcefile_path="$package_path/$sourcefile"
 
-if [[ "$sourcefile_realpath" != "$package_path"* ]]; then
-    echo "Source file's real path '$sourcefile_realpath' is not withn the package's path '$package_path'"
+if [ ! -e "$sourcefile_path" ]; then
+    echo "Error: Source file '$sourcefile_path' doesn't exist."
+    exit 1
+fi
+
+if dfm islinked "$package" "$targetfile" &> /dev/null; then
+    echo "Error: Target file '$targetfile' is already linked."
+    exit 1
+fi
+
+sourcefile_realpath=$(dirname "$(realpath "$sourcefile_path")")
+package_realpath=$(realpath "$package_path")
+
+if [[ "$sourcefile_realpath" != "$package_realpath"* ]]; then
+    echo "Error: Source file's real path '$sourcefile_realpath' is not within the package's path '$package_realpath'"
     exit 1
 fi
 
@@ -42,10 +45,12 @@ if [ -e "$targetfile" ]; then
     unixtime=$(date +%s)
     backup_filename="$(basename "$targetfile").bak-$unixtime"
     backup_path="$(dirname "$targetfile")/$backup_filename"
-    echo "[INFO] Target file '$targetfile' already exists. Creating backup in '$backup_path'" 
+    echo "Info: Target file '$targetfile' already exists. Creating backup in '$backup_path'" 
 
     mv "$targetfile" "$backup_path"
 fi
 
 
-ln -s "$sourcefile" "$targetfile"
+ln -s "$sourcefile_path" "$targetfile"
+
+# continue working on link, execute commands and test, then write tests

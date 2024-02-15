@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODOS:
+# For expected output, accept matter matching and other ways to check
+
 # Check if any arguments were passed
 if [ "$#" -eq 0 ]; then
     echo "No arguments provided."
@@ -28,7 +31,7 @@ run_test_inline() {
     temp_file=$(mktemp)
 
     # Before test
-    if ! before_test_output=$($before_test 2>&1 >/dev/null); then
+    if ! before_test_output=$(eval "$before_test" 2>&1 >/dev/null); then
         echo -e "\033[0;31mBefore test error:\033[0m"
         echo -e "\033[0;34m$before_test\033[0m"
         echo "$before_test_output"

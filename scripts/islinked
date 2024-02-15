@@ -9,30 +9,31 @@ package="$1"
 targetfile="$2"
 
 if ! output=$(yq ".packages.$package" < "$DFM_YAML" 2>/dev/null) || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Package '$package' is not defined in '$DFM_YAML'."
+    echo "Error: Package '$package' is not defined in '$DFM_YAML'."
     exit 1
 fi
 
 if [ ! -e "$targetfile" ]; then
-    echo "Target file '$targetfile' doesn't exist."
+    echo "Error: Target file '$targetfile' doesn't exist."
     exit 1
 fi
 
 if [ ! -L "$targetfile" ]; then
-    echo "Target file '$targetfile' is not a symlink."
+    echo "Error: Target file '$targetfile' is not a symlink."
     exit 1
 fi
 
 targetfile_realpath=$(realpath "$targetfile")
 package_path="$DFM_DOTFILES/packages/$package"
+package_realpath=$(dirname "$(realpath "$package_path")")
 
 if [ ! -d "$package_path" ]; then
-    echo "Package '$package' doesn't have a corresponding folder 'packages/$package'"
+    echo "Error: Package '$package' doesn't have a corresponding folder 'packages/$package'"
     exit 1
 fi
 
-if [[ "$targetfile_realpath" != "$package_path"* ]]; then
-    echo "Target file's real path '$targetfile_realpath' is not within the package's path '$package_path'."
+if [[ "$targetfile_realpath" != "$package_realpath"* ]]; then
+    echo "Error: Target file's real path '$targetfile_realpath' is not within the package's path '$package_realpath'."
     exit 1
 fi
 
