@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <package>"
+    exit 1
+fi
+
 package="$1"
 
 # Validate if package is defined
