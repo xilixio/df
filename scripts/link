@@ -50,7 +50,6 @@ if [ -e "$targetfile" ]; then
     mv "$targetfile" "$backup_path"
 fi
 
-
+targetfile_path=$(dirname "$targetfile")
+mkdir -p "$targetfile_path"
 ln -s "$sourcefile_path" "$targetfile"
-
-# continue working on link, execute commands and test, then write tests
