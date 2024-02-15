@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd "$HOME/.dfm" || exit 1
+git pull --rebase
