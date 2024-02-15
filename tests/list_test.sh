@@ -33,6 +33,9 @@ pk_no_install
 pkCD1
 pkCD2
 pk_install_fail
+test
+brew
+brew_packages
 EOF
 )
     [expected_status]=0
@@ -50,6 +53,9 @@ pk_no_install
 pkCD1
 pkCD2
 pk_install_fail
+test
+brew
+brew_packages
 EOF
 )
     [expected_status]=0
@@ -69,6 +75,9 @@ pk_no_install
 pkCD1
 pkCD2
 pk_install_fail
+test
+brew
+brew_packages
 EOF
 )
     [expected_status]=0
@@ -99,6 +108,9 @@ pk_no_install
 pkCD1
 pkCD2
 pk_install_fail
+test
+brew
+brew_packages
 EOF
 )
     [expected_status]=0
@@ -129,6 +141,9 @@ pk_no_install
 pkCD1
 pkCD2
 pk_install_fail
+test
+brew
+brew_packages
 EOF
 )
     [expected_status]=0
@@ -150,6 +165,9 @@ pk_no_install Linux,Darwin not_installed
 pkCD1 Linux,Darwin not_installed
 pkCD2 Linux,Darwin not_installed
 pk_install_fail Linux,Darwin not_installed
+test Linux,Darwin not_installed
+brew Linux,Darwin not_installed
+brew_packages Linux,Darwin not_installed
 EOF
 )
     [expected_status]=0
@@ -180,6 +198,9 @@ pk_no_install Linux,Darwin not_installed
 pkCD1 Linux,Darwin not_installed
 pkCD2 Linux,Darwin not_installed
 pk_install_fail Linux,Darwin not_installed
+test Linux,Darwin not_installed
+brew Linux,Darwin not_installed
+brew_packages Linux,Darwin not_installed
 EOF
 )
     [expected_status]=0

@@ -11,6 +11,10 @@ if [ "$#" -lt 1 ]; then
 fi
 
 package="$1"
+os=$(uname -s)
+os_arch="$(uname -m)"
+os_with_arch="$os/$os_arch"
+os_key_to_use="$os_with_arch"
 
 # Validate if package is defined
 if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
@@ -19,12 +23,16 @@ if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$
 fi
 
 # Check for empty deps or missing entry
-if ! output=$(yq ".packages.$package.deps" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-    exit 0
+if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    os_key_to_use="$os"
+
+    if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        exit 0
+    fi
 fi
 
 # Get deps and output
-mapfile -t deps < <(yq ".packages.$package.deps" < "$DFM_YAML" | sed 's/^- //')
+mapfile -t deps < <(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML" | sed 's/^- //')
 
 for dep in "${deps[@]}"; do
     echo "$dep"

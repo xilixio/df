@@ -12,6 +12,9 @@ fi
 
 package="$1"
 os="$(uname -s)"
+os_arch="$(uname -m)"
+os_with_arch="$os/$os_arch"
+os_key_to_use="$os_with_arch"
 
 # Validate if package is defined
 if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
@@ -20,14 +23,18 @@ if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$
 fi
 
 # Validate if OS is defined
-if ! output=$(yq ".packages.$package.$os" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Package's '$package' OS '$os' is not defined in '$DFM_YAML'."
-    exit 1
+if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    os_key_to_use="$os"
+
+    if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        echo "Package's '$package' OS '$os_key_to_use' is not defined in '$DFM_YAML'."
+        exit 1
+    fi
 fi
 
 # Validate if 'check' is defined
-if ! output=$(yq ".packages.$package.$os.check" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Missing 'check' entry on 'packages.$package.$os' in '$DFM_YAML'."
+if ! output=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Missing 'check' entry on 'packages.$package.$os_key_to_use' in '$DFM_YAML'."
     exit 1
 fi
 
@@ -46,13 +53,13 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Check package subcommand
-check_command=$(yq ".packages.$package.$os.check" < "$DFM_YAML")
+check_command=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_YAML")
 
 if eval "$check_command" >/dev/null 2>&1; then
-    ! $s_flag && echo "Package '$package' is installed on $os.";
+    ! $s_flag && echo "Package '$package' is installed on $os_key_to_use.";
     exit 0
 else
-    ! $s_flag && echo "Package '$package' is not installed on $os.";
+    ! $s_flag && echo "Package '$package' is not installed on $os_key_to_use.";
     exit 1
 fi
 

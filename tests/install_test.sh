@@ -227,7 +227,7 @@ declare -A t=(
             bin/dfm check pk3 -s"
     [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
     [expected_output]=$(cat <<EOF
-About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail 
+About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail test brew brew_packages
 Installing package 'pk3'...
 Successfully installed package 'pk3'.
 Installing package 'pk2'...
@@ -247,7 +247,7 @@ Successfully installed package 'pkCD1'.
 A cyclic dependency involving 'pkCD2' was found in the path '<root>->'pkCD2'->'pkCD1'->'pkCD2''.
 Package 'pkCD2' has validation errors, ignoring.
 Installing package 'pk_install_fail'...
-Failed installing package 'pk_insta_fail'. Error: Some error.
+Failed installing package 'pk_install_fail'. Error: Some error.
 Package 'pk_install_fail' has validation errors, ignoring.
 EOF
     )

@@ -1,77 +1,74 @@
 packages:
   pk1:
-    deps:
-      - pk2
     Linux:
+      deps:
+        - pk2
       install: "touch /tmp/pk1.tmp"
       check: "[ -e /tmp/pk1.tmp ]"
     Darwin:
       install: "touch /tmp/pk1.tmp"
       check: "[ -e /tmp/pk1.tmp ]"
   pk2:
-    deps:
-      - pk3
     Linux:
+      deps:
+        - pk3
       install: "touch /tmp/pk2.tmp"
       check: "[ -e /tmp/pk2.tmp ]"
     Darwin:
       install: "touch /tmp/pk2.tmp"
       check: "[ -e /tmp/pk2.tmp ]"
   pk3:
-    deps:
     Linux:
       install: "touch /tmp/pk3.tmp"
       check: "[ -e /tmp/pk3.tmp ]"
   pk4:
-    deps:
     Darwin:
       install: "touch /tmp/pk4.tmp"
       check: "[ -e /tmp/pk4.tmp ]"
   pk_no_os: "tbd"
   pk_no_check:
     Linux:
-      install: "true"
+      install: true
     Darwin:
-      install: "true"
+      install: true
   pk_no_install:
     Linux:
-      check: "false"
+      check: false
     Darwin:
-      check: "false"
+      check: false
   pkCD1:
-    deps:
-      - pkCD2
-      - pk1
     Linux:
-      install: "true"
-      check: "false"
+      deps:
+        - pkCD2
+        - pk1
+      install: true
+      check: false
     Darwin:
-      install: "true"
-      check: "false"
+      install: true
+      check: false
   pkCD2:
-    deps:
-      - pkCD1
     Linux:
-      install: "true"
-      check: "false"
+      deps:
+        - pkCD1
+      install: true
+      check: false
     Darwin:
-      install: "true"
-      check: "false"
+      install: true
+      check: false
   pk_install_fail:
-    deps:
     Linux:
       install: 'echo "Some error." && exit 1'
-      check: "false"
+      check: false
     Darwin:
       install: 'echo "Some error." && exit 1'
-      check: "false"
+      check: false
   test:
     Linux:
-      install: null
-      check: null
+      install: true
+      check: false
     Darwin:
-      install: null
-      check: null
+      install: true
+      check: false
   brew:
     Linux:
       install: true
@@ -80,11 +77,11 @@ packages:
       install: true
       check: false
   brew_packages:
-    deps:
-      - brew
     Linux:
+      deps:
+        - brew
       install: true
       check: false
     Darwin:
-      install: tru nulle
+      install: true
       check: false

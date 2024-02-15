@@ -7,6 +7,7 @@ fi
 
 packages=()
 os=$(uname -s)
+os_arch="$(uname -m)"
 s_flag=false # silent
 y_flag=false # don't prompt y/n
 i_flag=false # ignore failures
@@ -34,7 +35,8 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 validate_package() {
-    local package=$1
+    local package="$1"
+    local os="$2"
     local error=false
 
     # Validate if package is defined
@@ -71,7 +73,8 @@ validate_package() {
 }
 
 install_package() {
-    local package=$1
+    local package="$1"
+    local os="$2"
     local user_input="y"
 
     if [[ -v packages_seen["$package"] ]]; then
@@ -95,6 +98,8 @@ install_package() {
     fi
 
     install=$(yq ".packages.$package.$os.install" < "$DFM_YAML")
+    
+    if [ "$install" = "null" ]; then install=""; fi
 
     if ! install_output=$(eval "$install" 2>&1); then 
         ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
@@ -114,8 +119,13 @@ walk_deps_and_install() {
     local package="$1"
     local path="$2"
     local new_path="${path}->'${package}'"
+    local os_key_to_use="$os/$os_arch"
 
-    validate_package "$package"
+    if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        os_key_to_use="$os"
+    fi
+
+    validate_package "$package" "$os_key_to_use"
 
     if [ $? -eq 2 ]; then
         ! $s_flag && echo "Package '$package' has validation errors, ignoring."
@@ -136,10 +146,10 @@ walk_deps_and_install() {
     mapfile -t deps < <(dfm deps "$package")
 
     for dep in "${deps[@]}"; do
-        walk_deps_and_install "$dep"  "$new_path"
+        walk_deps_and_install "$dep" "$new_path"
     done
 
-    install_package "$package"
+    install_package "$package" "$os_key_to_use"
 }
 
 # Main
@@ -167,7 +177,7 @@ fi
 y_flag=true
 
 for package in "${packages[@]}"; do
-    walk_deps_and_install "$package"  "<root>"
+    walk_deps_and_install "$package" "<root>"
 done
 
 exit 0
