@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd $DFM_DOTFILES
+
+git diff --word-diff=color
