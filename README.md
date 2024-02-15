@@ -2,4 +2,4 @@
 
 # Installation
 
-`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xilixio/df/HEAD/bin/install-dfm)" `
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/xilixio/df/HEAD/scripts/install-dfm)"`
