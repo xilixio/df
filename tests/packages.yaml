@@ -28,40 +28,47 @@ packages:
       install: "touch /tmp/pk4.tmp"
       check: "[ -e /tmp/pk4.tmp ]"
   pk_no_os: "tbd"
-  pk_no_check: 
-    Linux: 
+  pk_no_check:
+    Linux:
       install: "true"
     Darwin:
       install: "true"
-  pk_no_install: 
-    Linux: 
+  pk_no_install:
+    Linux:
       check: "false"
     Darwin:
       check: "false"
-  pkCD1: 
+  pkCD1:
     deps:
       - pkCD2
       - pk1
-    Linux: 
+    Linux:
       install: "true"
       check: "false"
     Darwin:
       install: "true"
       check: "false"
-  pkCD2: 
+  pkCD2:
     deps:
       - pkCD1
-    Linux: 
+    Linux:
       install: "true"
       check: "false"
     Darwin:
       install: "true"
       check: "false"
-  pk_install_fail: 
+  pk_install_fail:
     deps:
-    Linux: 
+    Linux:
       install: "echo \"Some error.\"; exit 1"
       check: "false"
     Darwin:
       install: "echo \"Some error.\"; exit 1"
       check: "false"
+  test:
+    Linux:
+      install: null
+      check: null
+    Darwin:
+      install: null
+      check: null

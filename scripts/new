@@ -10,7 +10,18 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-package="$1"
+package="$1"; shift
+f_flag=""
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -f)
+            f_flag=true
+            ;;
+        *) ;;
+    esac
+    shift 
+done
 
 if [ "$(yq eval ".packages | has(\"$package\")" < "$DFM_YAML")" = "true" ]; then
     echo "The package '$package' already exists in '$DFM_YAML'."
@@ -20,4 +31,6 @@ fi
 contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$DFM_YAML") && echo "$contents" > "$DFM_YAML"
 echo "Added '$package' to '$DFM_YAML'."
 
-mkdir -p "$DFM_DOTFILES/packages/$package" && echo "Created folder '$DFM_DOTFILES/packages/$package'.";
+if [ -n "$f_flag" ]; then
+    mkdir -p "$DFM_DOTFILES/packages/$package" && echo "Created folder '$DFM_DOTFILES/packages/$package'.";
+fi
