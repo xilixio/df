@@ -85,3 +85,10 @@ packages:
     Darwin:
       install: true
       check: false
+  t1:
+    Linux:
+      install: null
+      check: null
+    Darwin:
+      install: null
+      check: null

@@ -32,12 +32,12 @@ EOF
 ); run_test t
 
 declare -A t=(
-    [description]="Add new package to yaml and create folder."
-    [test]="DFM_YAML=$DFM_YAML2 bin/dfm new test -f && cat \"$DFM_YAML2\""
-    [after_test]="rm -rf tests/packages &> /dev/null"
+    [description]="Add new package to yaml and create directory."
+    [test]="DFM_YAML=$DFM_YAML2 bin/dfm new test -d && cat \"$DFM_YAML2\" && [ -d \"$DFM_DOTFILES/packages/test\" ]"
+    [after_test]="rm -rf $DFM_DOTFILES/packages &> /dev/null"
     [expected_output]="$(cat <<EOF
 Added 'test' to '$DFM_YAML2'.
-Created folder '$DFM_DOTFILES/packages/test'.
+Created directory '$DFM_DOTFILES/packages/test'.
 packages:
   test:
     Linux:
@@ -52,18 +52,28 @@ EOF
 ); run_test t
 
 declare -A t=(
-    [description]="Throw if package exists on yaml."
-    [test]="bin/dfm new test && bin/dfm new test && cat \"$DFM_YAML\""
+    [description]="Add new package to yaml, create directory, and create executable."
+    [test]="DFM_YAML=$DFM_YAML2 bin/dfm new test -d && cat \"$DFM_YAML2\" && [ -d \"$DFM_DOTFILES/packages/test\" ] && [ -f \"$DFM_DOTFILES/packages/test\test.sh\" ]"
+    [after_test]="rm -rf $DFM_DOTFILES/packages &> /dev/null"
     [expected_output]="$(cat <<EOF
-The package 'test' already exists in '$DFM_YAML'.
+Added 'test' to '$DFM_YAML2'.
+Created directory '$DFM_DOTFILES/packages/test'.
+Created executable '$DFM_DOTFILES/packages/test/test.sh'.
+packages:
+  test:
+    Linux:
+      install: null
+      check: null
+    Darwin:
+      install: null
+      check: null
 EOF
 )"
-    [expected_status]=1
+    [expected_status]=0
 ); run_test t
-
 
 # After all
 rm "$DFM_YAML1" >/dev/null 2>&1
 rm "$DFM_YAML2" >/dev/null 2>&1
 DFM_YAML="$old_yaml"
-rm -rf tests/packages &> /dev/null
+rm -rf $DFM_DOTFILES/packages &> /dev/null

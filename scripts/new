@@ -6,16 +6,21 @@ if [ -z "$DFM_SUBCOMMAND" ]; then
 fi
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <package>"
+    echo "Usage: $0 <package> [-d|-df]"
     exit 1
 fi
 
 package="$1"; shift
+d_flag=""
 f_flag=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        -f)
+        -d)
+            d_flag=true
+            ;;
+        -df)
+            d_flag=true
             f_flag=true
             ;;
         *) ;;
@@ -23,14 +28,23 @@ while [ "$#" -gt 0 ]; do
     shift 
 done
 
-if [ "$(yq eval ".packages | has(\"$package\")" < "$DFM_YAML")" = "true" ]; then
-    echo "The package '$package' already exists in '$DFM_YAML'."
-    exit 1
+if [ ! "$(yq eval ".packages | has(\"$package\")" < "$DFM_YAML")" = "true" ]; then
+    contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$DFM_YAML") && \
+        echo "$contents" > "$DFM_YAML" && \
+        echo "Added '$package' to '$DFM_YAML'."
 fi
 
-contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$DFM_YAML") && echo "$contents" > "$DFM_YAML"
-echo "Added '$package' to '$DFM_YAML'."
+package_path="$DFM_DOTFILES/packages/$package"
 
-if [ -n "$f_flag" ]; then
-    mkdir -p "$DFM_DOTFILES/packages/$package" && echo "Created folder '$DFM_DOTFILES/packages/$package'.";
+if [ -n "$d_flag" ] && [ ! -d "$package_path" ]; then
+    mkdir -p "$package_path" && \
+      echo "Created directory '$package_path'.";
+fi
+
+file_path="$DFM_DOTFILES/packages/$package/$package.sh"
+
+if [ -n "$f_flag" ] && [ ! -f "$file_path" ]; then
+  printf "!/bin/bash\n" > "$file_path" && \
+    chmod +x "$file_path"
+    echo "Created executable '$file_path'.";
 fi
