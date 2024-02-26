@@ -92,6 +92,7 @@ install_package() {
     fi
 
     # Check if the package has already been installed
+    # if output=$(dfm check "$package" 2>&1); then
     if output=$(dfm check "$package"); then
         ! $s_flag && echo "Package '$package' was already installed, skipping."
         return
@@ -101,6 +102,7 @@ install_package() {
     
     if [ "$install" = "null" ]; then install=""; fi
 
+    # if ! install_output=$(eval "$install" 2>&1); then 
     if ! install_output=$(eval "$install"); then 
         ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
 
