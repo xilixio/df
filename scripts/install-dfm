@@ -126,5 +126,6 @@ if [ ! -f "$gitconfig_file" ]; then
 fi
 
 
+exec $SHELL -l
 echo ""
-echo "Successfully installed dfm. Please reload your shell."
+echo "Successfully installed dfm."
