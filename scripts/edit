@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ -z "$DFM_SUBCOMMAND" ]; then
+    echo "Subcommand $0 should be called using 'dfm' command."
+    exit 1
+fi
+
+# Ensure DFM_YAML variable is not empty
+if [ -z "$DFM_YAML" ]; then
+    echo "The DFM_YAML variable is not set. Exiting."
+    exit 1
+fi
+
+# Function to check if a program exists
+command_exists() {
+    command -v "$1" &> /dev/null
+}
+
+# Try to use $EDITOR, fall back to vim, vi, then nano
+if [ -n "$EDITOR" ]; then
+    $EDITOR "$DFM_YAML"
+elif command_exists vim; then
+    vim "$DFM_YAML"
+elif command_exists vi; then
+    vi "$DFM_YAML"
+elif command_exists nano; then
+    nano "$DFM_YAML"
+else
+    echo "No suitable editor found. Please install vim, vi, or nano, or set the EDITOR environment variable."
+    exit 1
+fi
+
