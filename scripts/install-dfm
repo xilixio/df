@@ -113,8 +113,16 @@ gitconfig_file="$HOME/.gitconfig"
 if [ ! -f "$gitconfig_file" ]; then
     echo "The .gitconfig file does not exist. Creating one now."
 
-    read -rp "Enter your name: " name
-    read -rp "Enter your email: " email
+    if [ ! "$DFM_GIT_NAME" ]; then
+        read -rp "Enter your name: " name
+    else
+        name="$DFM_GIT_NAME"
+    fi
+    
+    if [ ! "$DFM_GIT_EMAIL" ]; then
+        read -rp "Enter your email: " email
+        email="$DFM_GIT_EMAIL"
+    fi
 
     {
         echo "[user]"
