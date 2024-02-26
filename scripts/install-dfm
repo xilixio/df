@@ -125,7 +125,5 @@ if [ ! -f "$gitconfig_file" ]; then
     echo ".gitconfig file has been created."
 fi
 
-
-exec $SHELL -l
 echo ""
-echo "Successfully installed dfm."
+echo "Successfully installed dfm. Please reload your shell."
