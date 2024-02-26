@@ -55,7 +55,8 @@ done
 # Check package subcommand
 check_command=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_YAML")
 
-if eval "$check_command" >/dev/null 2>&1; then
+# if eval "$check_command" >/dev/null 2>&1; then
+if eval "$check_command" >/dev/null; then
     ! $s_flag && echo "Package '$package' is installed on $os_key_to_use.";
     exit 0
 else
