@@ -75,13 +75,12 @@ install_package() {
     local os="$2"
     local user_input="y"
 
-    package_key="$package"
-
-    if eval "[ -n \"\${package_seen_${package_key}+x}\" ]"; then
+    # Using this syntax since associative arrays "declare -A" is not compatible on MacOS
+    if eval "[ -n \"\${package_seen_${package}+x}\" ]"; then
         return
     fi
 
-    eval "package_seen_${package_key}=1"
+    eval "package_seen_${package}=1"
 
     ! $y_flag && read -rp "About to install package '$package'. Do you want to continue? (y/n): " user_input
     ! $s_flag && echo "Installing package '$package'..."
