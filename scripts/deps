@@ -16,6 +16,11 @@ os_arch="$(uname -m)"
 os_with_arch="$os/$os_arch"
 os_key_to_use="$os_with_arch"
 
+if [[ "$package" == *-* ]]; then
+    echo "Invalid character - in package name '$package'."
+    exit 1
+fi
+
 # Validate if package is defined
 if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
     echo "Package '$package' is not defined in '$DFM_YAML'."

@@ -37,6 +37,11 @@ validate_package() {
     local os="$2"
     local error=false
 
+    if [[ "$package" == *-* ]]; then
+        ! $s_flag && echo "Invalid character - in package name '$package'."
+        error=true
+    fi
+
     # Validate if package is defined
     if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
         ! $s_flag && echo "Package '$package' is not defined in '$DFM_YAML'."
@@ -117,7 +122,7 @@ install_package() {
 }
 
 walk_deps_and_install() {
-    local package="${1//-/_}"
+    local package="$1"
     local path="$2"
     local new_path="${path}->'${package}'"
     local os_key_to_use="$os/$os_arch"
