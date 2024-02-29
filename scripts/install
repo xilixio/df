@@ -145,7 +145,11 @@ walk_deps_and_install() {
         exit 1
     fi
 
-    mapfile -t deps < <(dfm deps "$package")
+    deps=()
+
+    while IFS= read -r line; do
+        deps+=("$line")
+    done < <(dfm deps "$package")
 
     for dep in "${deps[@]}"; do
         walk_deps_and_install "$dep" "$new_path"
@@ -156,7 +160,11 @@ walk_deps_and_install() {
 
 # Main
 if [ ${#packages[@]} -eq 0 ]; then
-    mapfile -t packages < <(dfm list)
+    packages=()
+
+    while IFS= read -r line; do
+        packages+=("$line")
+    done < <(dfm list)
 fi 
 
 ! $s_flag && echo -n "About to install the following packages: "

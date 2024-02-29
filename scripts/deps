@@ -32,7 +32,11 @@ if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML") || [ -z
 fi
 
 # Get deps and output
-mapfile -t deps < <(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML" | sed 's/^- //')
+deps=()
+
+while IFS= read -r line; do
+    deps+=("$line")
+done < <(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML" | sed 's/^- //')
 
 for dep in "${deps[@]}"; do
     echo "$dep"
