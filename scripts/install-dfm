@@ -1,11 +1,13 @@
 #!/bin/bash
 
-printf "Do you want to install dfm? (y/n): "
-read -r answer
+if [ -z "$DFM_YES_FLAG" ]; then
+    printf "Do you want to install dfm? (y/n): "
+    read -r answer
 
-if [ "$answer" != "y" ]; then
-    echo "Installation aborted by the user."
-    exit 0
+    if [ "$answer" != "y" ]; then
+        echo "Installation aborted by the user."
+        exit 0
+    fi
 fi
 
 # Install pre requisites
