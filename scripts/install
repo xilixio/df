@@ -107,8 +107,8 @@ install_package() {
     if [ "$install" = "null" ]; then install=""; fi
 
     # if ! install_output=$(eval "$install" 2>&1); then 
-    if ! eval "$install"; then 
-        ! $s_flag && echo "Failed installing package '$package'."
+    if ! install_output=$(eval "$install"); then 
+        ! $s_flag && echo "Failed installing package '$package'. Error: $install_output"
 
         if [[ "$i_flag" = true ]]; then
             ! $s_flag && echo "Package '$package' has validation errors, ignoring."
@@ -116,6 +116,10 @@ install_package() {
         fi
 
         exit 1
+    fi
+
+    if [ -n "$install_output" ]; then
+        ! $s_flag && echo "$install_output"
     fi
 
     ! $s_flag && echo "Successfully installed package '$package'."
