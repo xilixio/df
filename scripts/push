@@ -8,8 +8,7 @@ fi
 machine_name=$(hostname)
 os=$(uname -s)
 username=$USER
-unixtime=$(date +%s)
-commit="${machine_name}-${os}-${username}-${unixtime}"
+commit_time=$(date '+%Y/%m/%d %H:%M:%S')
 
 cd "$DFM_DOTFILES" || exit 1
 
@@ -22,7 +21,7 @@ if ! git add -A; then
     exit 1
 fi
 
-if ! git commit -m "[push] $commit"; then
+if ! git commit -m "[Push] By ${username} on ${commit_time}. Host: ${machine_name}, OS: ${os}"; then
     echo "Error when committing changes, aborting."
     exit 1
 fi
