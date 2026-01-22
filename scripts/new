@@ -6,9 +6,13 @@ if [ -z "$DFM_SUBCOMMAND" ]; then
 fi
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <package> [-d|-df]"
+    echo "Usage: $0 <package> [-d|-df] [-t <file>]"
     exit 1
 fi
+
+# Source the yaml merge helper
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source "$script_dir/_yaml_merge"
 
 package="$1"; shift
 
@@ -19,6 +23,7 @@ fi
 
 d_flag=""
 f_flag=""
+t_flag=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -29,15 +34,79 @@ while [ "$#" -gt 0 ]; do
             d_flag=true
             f_flag=true
             ;;
+        -f)
+            f_flag=true
+            ;;
+        -t)
+            shift
+            t_flag="$1"
+            ;;
         *) ;;
     esac
-    shift 
+    shift
 done
 
-if [ ! "$(yq eval ".packages | has(\"$package\")" < "$DFM_YAML")" = "true" ]; then
-    contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$DFM_YAML") && \
-        echo "$contents" > "$DFM_YAML" && \
-        echo "Added '$package' to '$DFM_YAML'."
+# Determine target YAML file
+target_yaml=""
+
+if is_multifile_mode; then
+    if [ -n "$t_flag" ]; then
+        # Use specified target file
+        target_yaml="$DFM_DOTFILES/packages/$t_flag"
+
+        # Ensure it has .yaml extension
+        if [[ "$target_yaml" != *.yaml ]]; then
+            target_yaml="${target_yaml}.yaml"
+        fi
+
+        # Create the file if it doesn't exist with proper structure
+        if [ ! -f "$target_yaml" ]; then
+            echo "packages: {}" > "$target_yaml"
+            echo "Created new YAML file '$target_yaml'."
+        fi
+    else
+        # Multi-file mode without -t flag: error with available files
+        echo "Error: In multi-file mode, you must specify a target file with -t <file>."
+        echo ""
+        echo "Available YAML files:"
+        while IFS= read -r yaml_file; do
+            [ -z "$yaml_file" ] && continue
+            echo "  $(basename "$yaml_file")"
+        done < <(get_yaml_files)
+        echo ""
+        echo "Usage: dfm new $package -t <file.yaml>"
+        exit 1
+    fi
+else
+    # Single file mode
+    if [ -n "$t_flag" ]; then
+        echo "Warning: -t flag ignored in single-file mode. Using '$DFM_YAML'."
+    fi
+    target_yaml="$DFM_YAML"
+fi
+
+# Check for duplicate in merged YAML (across all files)
+DFM_MERGED_YAML=$(mktemp)
+trap 'rm -f "$DFM_MERGED_YAML"' EXIT
+
+if get_merged_yaml > "$DFM_MERGED_YAML" 2>/dev/null; then
+    if [ "$(yq eval ".packages | has(\"$package\")" < "$DFM_MERGED_YAML")" = "true" ]; then
+        # Find which file contains it
+        source_file=$(get_package_source_file "$package")
+        if [ -n "$source_file" ]; then
+            echo "Package '$package' already exists in '$source_file'."
+        else
+            echo "Package '$package' already exists."
+        fi
+        exit 1
+    fi
+fi
+
+# Add package to target YAML
+if [ ! "$(yq eval ".packages | has(\"$package\")" < "$target_yaml")" = "true" ]; then
+    contents=$(yq eval ".packages.$package = {\"Linux\": {\"install\": null, \"check\": null}, \"Darwin\": {\"install\": null, \"check\": null}}" < "$target_yaml") && \
+        echo "$contents" > "$target_yaml" && \
+        echo "Added '$package' to '$target_yaml'."
 fi
 
 package_path="$DFM_DOTFILES/packages/$package"

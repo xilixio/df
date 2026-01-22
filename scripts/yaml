@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ -z "$DFM_SUBCOMMAND" ]; then
+    echo "Subcommand $0 should be called using 'dfm' command."
+    exit 1
+fi
+
+# Source the yaml merge helper
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source "$script_dir/_yaml_merge"
+
+# List all YAML source files with package counts
+list_yaml_sources
