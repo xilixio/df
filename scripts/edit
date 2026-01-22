@@ -51,12 +51,13 @@ if [ $# -ge 1 ]; then
             target_file="${target_file}.yaml"
         fi
     else
-        # In single-file mode, warn and use argument as-is (or use DFM_YAML)
+        # In single-file mode, only allow editing the single YAML file
         if [ "$file_arg" = "$(basename "$DFM_YAML")" ]; then
             target_file="$DFM_YAML"
         else
-            echo "Warning: In single-file mode. Opening '$DFM_YAML'."
-            target_file="$DFM_YAML"
+            echo "Error: In single-file mode, only '$(basename "$DFM_YAML")' can be edited."
+            echo "To use multiple YAML files, create a 'packages/' directory with .yaml files."
+            exit 1
         fi
     fi
 
@@ -70,11 +71,13 @@ else
         while IFS= read -r yaml_file; do
             [ -z "$yaml_file" ] && continue
             count=$(yq '.packages | keys | length' < "$yaml_file" 2>/dev/null || echo "0")
-            printf "  dfm edit %-20s (%d packages)\n" "$(basename "$yaml_file")" "$count"
+            pkg_word="packages"
+            [ "$count" -eq 1 ] && pkg_word="package"
+            printf "  dfm edit %-20s (%d %s)\n" "$(basename "$yaml_file")" "$count" "$pkg_word"
         done < <(get_yaml_files)
         echo ""
-        echo "Or edit the legacy single file:"
-        if [ -f "$DFM_YAML" ]; then
+        if [ -f "$DFM_YAML" ] && validate_yaml_file "$DFM_YAML"; then
+            echo "Or edit the legacy single file:"
             echo "  dfm edit $(basename "$DFM_YAML")"
         fi
         exit 0

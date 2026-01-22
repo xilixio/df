@@ -97,10 +97,6 @@ if [ "$has_packages_dir" = false ] && [ "$has_single_yaml" = false ]; then
     exit 1
 fi
 
-# Export for subcommands
-export DFM_HAS_PACKAGES_DIR="$has_packages_dir"
-export DFM_HAS_SINGLE_YAML="$has_single_yaml"
-
 # Extract the subcommand
 subcommand="$1"
 shift  # Remove the first argument, leaving any additional arguments

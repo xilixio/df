@@ -60,12 +60,15 @@ get_packages_from_file() {
 }
 
 # Check for duplicate packages across all YAML files
+# Outputs valid file paths to stdout (one per line)
 # Returns 0 if no duplicates, 1 if duplicates found (with error message to stderr)
 check_for_duplicates() {
     local duplicates_found=false
     local pkg_list_file
+    local valid_files_list
     pkg_list_file=$(mktemp)
-    trap 'rm -f "$pkg_list_file"' RETURN
+    valid_files_list=$(mktemp)
+    trap 'rm -f "$pkg_list_file" "$valid_files_list"' RETURN
 
     while IFS= read -r yaml_file; do
         [ -z "$yaml_file" ] && continue
@@ -74,6 +77,9 @@ check_for_duplicates() {
             echo "Warning: Skipping invalid YAML file '$yaml_file' (missing or empty packages: key)" >&2
             continue
         fi
+
+        # Track valid file
+        echo "$yaml_file" >> "$valid_files_list"
 
         while IFS= read -r pkg; do
             [ -z "$pkg" ] && continue
@@ -97,6 +103,9 @@ check_for_duplicates() {
     if [ "$duplicates_found" = true ]; then
         return 1
     fi
+
+    # Output valid files to stdout
+    cat "$valid_files_list"
     return 0
 }
 
@@ -110,31 +119,21 @@ get_merged_yaml() {
         return 0
     fi
 
-    # Multi-file mode - check for duplicates first
-    if ! check_for_duplicates; then
+    # Multi-file mode - check for duplicates and get valid files
+    local valid_files_output
+    valid_files_output=$(check_for_duplicates)
+    if [ $? -ne 0 ]; then
         return 1
     fi
 
-    # Collect all valid YAML files
-    local files_to_merge=""
-    local valid_files=0
-
-    while IFS= read -r yaml_file; do
-        [ -z "$yaml_file" ] && continue
-
-        if ! validate_yaml_file "$yaml_file"; then
-            # Warning already printed by check_for_duplicates
-            continue
-        fi
-
-        valid_files=$((valid_files + 1))
-        files_to_merge="$files_to_merge $yaml_file"
-    done < <(get_yaml_files)
-
-    if [ "$valid_files" -eq 0 ]; then
+    if [ -z "$valid_files_output" ]; then
         echo "Error: No valid YAML files found in packages directory" >&2
         return 1
     fi
+
+    # Convert newline-separated files to space-separated for yq
+    local files_to_merge
+    files_to_merge=$(echo "$valid_files_output" | tr '\n' ' ')
 
     # Use yq to merge all files using ireduce
     # shellcheck disable=SC2086
@@ -174,7 +173,9 @@ list_yaml_sources() {
     if ! is_multifile_mode; then
         local count
         count=$(yq '.packages | keys | length' < "$DFM_YAML" 2>/dev/null || echo "0")
-        echo "$DFM_YAML ($count packages)"
+        local pkg_word="packages"
+        [ "$count" -eq 1 ] && pkg_word="package"
+        echo "$DFM_YAML ($count $pkg_word)"
         return 0
     fi
 
@@ -195,8 +196,12 @@ list_yaml_sources() {
         # Show relative path from packages dir
         local rel_path
         rel_path=$(basename "$yaml_file")
-        printf "  packages/%-20s (%d packages)\n" "$rel_path" "$count"
+        local pkg_word="packages"
+        [ "$count" -eq 1 ] && pkg_word="package"
+        printf "  packages/%-20s (%d %s)\n" "$rel_path" "$count" "$pkg_word"
     done < <(get_yaml_files)
 
-    echo "Total: $total packages"
+    local total_word="packages"
+    [ "$total" -eq 1 ] && total_word="package"
+    echo "Total: $total $total_word"
 }
