@@ -18,7 +18,7 @@ command_exists() {
 
 # Try to use $EDITOR, fall back to vim, vi, then nano
 if [ -n "$EDITOR" ]; then
-    $EDITOR "$DFM_YAML"
+    "$EDITOR" "$DFM_YAML"
 elif command_exists vim; then
     vim "$DFM_YAML"
 elif command_exists vi; then

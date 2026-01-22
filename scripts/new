@@ -11,6 +11,12 @@ if [ $# -lt 1 ]; then
 fi
 
 package="$1"; shift
+
+if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    echo "Invalid package name '$package'. Package names must contain only letters, numbers, and underscores."
+    exit 1
+fi
+
 d_flag=""
 f_flag=""
 
@@ -44,7 +50,7 @@ fi
 file_path="$DFM_DOTFILES/packages/$package/$package.sh"
 
 if [ -n "$f_flag" ] && [ ! -f "$file_path" ]; then
-  printf "!/bin/bash\n" > "$file_path" && \
+  printf "#!/bin/bash\n" > "$file_path" && \
     chmod +x "$file_path"
     echo "Created executable '$file_path'.";
 fi

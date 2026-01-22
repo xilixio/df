@@ -18,6 +18,12 @@ if ! [ -d "$DFM_DOTFILES" ]; then
     exit 1
 fi
 
+# Check if the YAML file exists
+if ! [ -f "$DFM_YAML" ]; then
+    echo "Error: DFM_YAML file '$DFM_YAML' doesn't exist. Please create a packages.yaml file in your dotfiles directory."
+    exit 1
+fi
+
 # Extract the subcommand
 subcommand="$1"
 shift  # Remove the first argument, leaving any additional arguments

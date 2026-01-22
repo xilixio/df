@@ -32,6 +32,8 @@ run_test_inline() {
 
     # Create a temporary file for the command output
     temp_file=$(mktemp)
+    # Ensure temp file is cleaned up on exit
+    trap 'rm -f "$temp_file"' RETURN
 
     # Before test
     if ! before_test_output=$(eval "$before_test" 2>&1); then

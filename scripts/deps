@@ -16,8 +16,8 @@ os_arch="$(uname -m)"
 os_with_arch="$os/$os_arch"
 os_key_to_use="$os_with_arch"
 
-if [[ "$package" == *-* ]]; then
-    echo "Invalid character - in package name '$package'."
+if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    echo "Invalid package name '$package'. Package names must contain only letters, numbers, and underscores."
     exit 1
 fi
 

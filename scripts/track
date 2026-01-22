@@ -12,6 +12,11 @@ fi
 
 package="$1"; shift
 
+if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    echo "Invalid package name '$package'. Package names must contain only letters, numbers, and underscores."
+    exit 1
+fi
+
 file_or_dir_paths=()
 
 for file_or_dir in "$@"; do
@@ -38,8 +43,9 @@ fi
 for file_or_dir in "${file_or_dir_paths[@]}"; do
     # Check if the path (file or directory) exists
     if [ ! -f "$file_or_dir" ] && [ ! -d "$file_or_dir" ]; then
-        echo "'$file_or_dir' is not a valid file or directory."
-    fi 
+        echo "Error: '$file_or_dir' is not a valid file or directory."
+        exit 1
+    fi
 
     # Move file or dir to package dir
     basename=$(basename "$file_or_dir")

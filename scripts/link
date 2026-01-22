@@ -14,6 +14,11 @@ package="$1"
 sourcefile="$2"
 targetfile="$3"
 
+if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    echo "Error: Invalid package name '$package'. Package names must contain only letters, numbers, and underscores."
+    exit 1
+fi
+
 if ! output=$(yq ".packages.$package" < "$DFM_YAML" 2>/dev/null) || [ -z "$output" ] || [ "$output" = "null" ]; then
     echo "Error: Package '$package' is not defined in '$DFM_YAML'."
     exit 1
@@ -41,20 +46,41 @@ fi
 sourcefile_realpath=$(dirname "$(realpath "$sourcefile_path")")
 package_realpath=$(realpath "$package_path")
 
-if [[ "$sourcefile_realpath" != "$package_realpath"* ]]; then
+# Validate path is within package directory (prevent path traversal)
+if [[ "$sourcefile_realpath" != "$package_realpath" && "$sourcefile_realpath" != "$package_realpath/"* ]]; then
     echo "Error: Source file's real path '$sourcefile_realpath' is not within the package's path '$package_realpath'"
     exit 1
 fi
 
+backup_path=""
 if [ -e "$targetfile" ]; then
     unixtime=$(date +%s)
     backup_filename="$(basename "$targetfile").bak-$unixtime"
     backup_path="$(dirname "$targetfile")/$backup_filename"
-    echo "Info: Target file '$targetfile' already exists. Creating backup in '$backup_path'" 
+    echo "Info: Target file '$targetfile' already exists. Creating backup in '$backup_path'"
 
-    mv "$targetfile" "$backup_path"
+    if ! mv "$targetfile" "$backup_path"; then
+        echo "Error: Failed to create backup of '$targetfile'"
+        exit 1
+    fi
 fi
 
 targetfile_path=$(dirname "$targetfile")
-mkdir -p "$targetfile_path"
-ln -s "$sourcefile_path" "$targetfile"
+if ! mkdir -p "$targetfile_path"; then
+    echo "Error: Failed to create directory '$targetfile_path'"
+    # Restore backup if it exists
+    if [ -n "$backup_path" ] && [ -e "$backup_path" ]; then
+        mv "$backup_path" "$targetfile"
+    fi
+    exit 1
+fi
+
+if ! ln -s "$sourcefile_path" "$targetfile"; then
+    echo "Error: Failed to create symlink from '$sourcefile_path' to '$targetfile'"
+    # Restore backup if it exists
+    if [ -n "$backup_path" ] && [ -e "$backup_path" ]; then
+        mv "$backup_path" "$targetfile"
+        echo "Info: Restored original file from backup"
+    fi
+    exit 1
+fi

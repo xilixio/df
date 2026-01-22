@@ -6,6 +6,7 @@ if [ -z "$DFM_SUBCOMMAND" ]; then
 fi
 
 packages=()
+declare -A package_seen  # Track installed packages to avoid duplicates
 os=$(uname -s)
 os_arch="$(uname -m)"
 s_flag=false # silent
@@ -37,8 +38,8 @@ validate_package() {
     local os="$2"
     local error=false
 
-    if [[ "$package" == *-* ]]; then
-        ! $s_flag && echo "Invalid character - in package name '$package'."
+    if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
+        ! $s_flag && echo "Invalid package name '$package'. Package names must contain only letters, numbers, and underscores."
         error=true
     fi
 
@@ -80,12 +81,12 @@ install_package() {
     local os="$2"
     local user_input="y"
 
-    # Using this syntax since associative arrays "declare -A" is not compatible on MacOS
-    if eval "[ -n \"\${package_seen_${package}+x}\" ]"; then
+    # Check if package has already been processed
+    if [[ -n "${package_seen[$package]+x}" ]]; then
         return
     fi
 
-    eval "package_seen_${package}=1"
+    package_seen[$package]=1
 
     ! $y_flag && read -rp "About to install package '$package'. Do you want to continue? (y/n): " user_input
     ! $s_flag && echo "Installing package '$package'..."
@@ -142,7 +143,8 @@ walk_deps_and_install() {
         return
     fi
 
-    if [[ "$path" =~ "->'${package}'" ]]; then
+    # Check for exact match to avoid false positives (e.g., "test" matching "test_pkg")
+    if [[ "${path}->" =~ "->'${package}'->" ]]; then
         ! $s_flag && echo "A cyclic dependency involving '$package' was found in the path '$new_path'."
 
         if [[ "$i_flag" = true ]]; then

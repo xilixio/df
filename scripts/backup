@@ -5,6 +5,9 @@ if [ -z "$DFM_SUBCOMMAND" ]; then
     exit 1
 fi
 
+# Change to dotfiles directory first so all git operations run in correct location
+cd "$DFM_DOTFILES" || { echo "Error: Failed to change to dotfiles directory '$DFM_DOTFILES'"; exit 1; }
+
 if [ -z "$(git status -s)" ]; then
     exit 0
 fi
@@ -15,13 +18,34 @@ commit_time=$(date '+%Y/%m/%d %H:%M:%S')
 backup_branch="backup_${username}_${branch_time}"
 original_branch=$(git branch --show-current)
 
-cd "$DFM_DOTFILES" || exit 1
+if ! git checkout -b "$backup_branch"; then
+    echo "Error: Failed to create backup branch '$backup_branch'"
+    exit 1
+fi
 
-git checkout -b "$backup_branch"
-git add -A
-git commit -m "[Backup] By ${username} on ${commit_time}"
-git push -u origin "$backup_branch"
-git checkout "$original_branch"
+if ! git add -A; then
+    echo "Error: Failed to stage changes"
+    git checkout "$original_branch" 2>/dev/null
+    exit 1
+fi
+
+if ! git commit -m "[Backup] By ${username} on ${commit_time}"; then
+    echo "Error: Failed to create backup commit"
+    git checkout "$original_branch" 2>/dev/null
+    exit 1
+fi
+
+if ! git push -u origin "$backup_branch"; then
+    echo "Error: Failed to push backup branch to remote"
+    git checkout "$original_branch" 2>/dev/null
+    exit 1
+fi
+
+if ! git checkout "$original_branch"; then
+    echo "Error: Failed to return to original branch '$original_branch'"
+    exit 1
+fi
+
 git diff .."$backup_branch" | git apply
 
-cd - || exit 1
+cd - >/dev/null || exit 1
