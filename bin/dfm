@@ -1,10 +1,65 @@
 #!/bin/bash
 
-# Check if at least one argument was provided
+# Show help message
+show_help() {
+    cat << 'EOF'
+dfm - Dotfiles Manager
+
+Usage: dfm <command> [arguments...]
+
+Package Management:
+  list              List all defined packages
+                      -a          List all packages (ignore OS filter)
+                      -o <os>     Filter by OS (Darwin, Linux)
+                      -s <bool>   Filter by setup status (true/false)
+                      -i          Show detailed package info
+  check <pkg>       Check if a package is installed
+                      -s          Silent mode (exit code only)
+  install [pkgs]    Install one or more packages with dependencies
+                      -s          Silent mode
+                      -y          Skip confirmation prompts
+                      -i          Ignore failures, continue installing
+  deps <pkg>        Show dependencies for a package
+  new <pkg>         Create a new package entry in packages.yaml
+                      -d          Also create package directory
+                      -f          Also create empty package file
+
+File Management:
+  track <pkg> <paths...>    Move files into package dir and symlink back
+  link <pkg> <src> <dest>   Create symlink from package file to target
+  islinked <pkg> <target>   Check if target is linked to package
+
+Git Operations:
+  status            Show git status of dotfiles repository
+  diff              Show word diff of dotfiles changes
+  pull              Pull latest changes (rebase + autostash)
+  push              Stage, commit, and push all changes
+  sync              Pull then push (combines both)
+  backup            Create a timestamped backup branch
+
+Utilities:
+  edit              Open packages.yaml in your editor
+  update            Update dfm to latest version
+  install-dfm       Install dfm and its dependencies
+
+Options:
+  -h, --help        Show this help message
+
+EOF
+}
+
+# Check for help flag or no arguments
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <subcommand> [arguments...]"
+    show_help
     exit 1
 fi
+
+case "$1" in
+    -h|--help|help)
+        show_help
+        exit 0
+        ;;
+esac
 
 # Check if the yq command is installed
 if ! command -v yq &> /dev/null; then
