@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "~/dev/1p/dfm",
+      "/tmp"
+    ],
+    "allow": [
+      "Read(~/dev/1p/dfm/**)",
+      "Write(~/dev/1p/dfm/**)",
+      "Edit(~/dev/1p/dfm/**)",
+      "Bash(cd ~/dev/1p/dfm*)",
+      "Read(//tmp/**)",
+      "Write(//tmp/**)",
+      "Edit(//tmp/**)",
+      "Bash(cd //tmp*)"
+    ]
+  }
+}
