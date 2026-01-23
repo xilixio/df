@@ -66,3 +66,16 @@ declare -A t=(
 
 rm targetf* &> /dev/null
 rm -rf tests/packages &> /dev/null
+
+# P6-LINK-RELATIVE-SYMLINK: Test that symlinks are created with absolute paths
+declare -A t=(
+    [description]="P6: Create symlink with absolute path (not relative)"
+    [before_test]="mkdir -p tests/packages/pk1 && echo 'content' > tests/packages/pk1/sourcef"
+    [test]="dfm link pk1 sourcef targetf && readlink targetf | grep -q '^/'"
+    [after_test]="rm -f targetf; rm -rf tests/packages/pk1"
+    [expected_output]=""
+    [expected_status]=0
+); run_test t
+
+rm -f targetf &> /dev/null
+rm -rf tests/packages/pk1 &> /dev/null
