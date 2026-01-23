@@ -189,7 +189,7 @@ For maximum impact with minimal risk:
 ## Checklist
 
 - [x] P1-BASH-VERSION
-- [ ] P2-INSTALL-TEST-SYNTAX
+- [x] P2-INSTALL-TEST-SYNTAX
 - [ ] P3-TRACK-RACE-CONDITION
 - [ ] P4-BACKUP-CLEANUP
 - [ ] P5-INSTALL-DFM-ARM

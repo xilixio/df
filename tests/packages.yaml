@@ -6,6 +6,8 @@ packages:
       install: "touch /tmp/pk1.tmp"
       check: "[ -e /tmp/pk1.tmp ]"
     Darwin:
+      deps:
+        - pk2
       install: "touch /tmp/pk1.tmp"
       check: "[ -e /tmp/pk1.tmp ]"
   pk2:
@@ -15,10 +17,15 @@ packages:
       install: "touch /tmp/pk2.tmp"
       check: "[ -e /tmp/pk2.tmp ]"
     Darwin:
+      deps:
+        - pk3
       install: "touch /tmp/pk2.tmp"
       check: "[ -e /tmp/pk2.tmp ]"
   pk3:
     Linux:
+      install: "touch /tmp/pk3.tmp"
+      check: "[ -e /tmp/pk3.tmp ]"
+    Darwin:
       install: "touch /tmp/pk3.tmp"
       check: "[ -e /tmp/pk3.tmp ]"
   pk4:
@@ -44,6 +51,8 @@ packages:
       install: true
       check: false
     Darwin:
+      deps:
+        - pkCD2
       install: true
       check: false
   pkCD2:
@@ -53,6 +62,8 @@ packages:
       install: true
       check: false
     Darwin:
+      deps:
+        - pkCD1
       install: true
       check: false
   pk_install_fail:
