@@ -1,0 +1,34 @@
+# Git worktrees
+.worktrees/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Test artifacts
+tests/tmp/
+tests/*.tmp
+*.log
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Shell
+*.sh.bak
+
+# Environment files (may contain secrets)
+.env
+.env.local
