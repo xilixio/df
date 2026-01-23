@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Requires Bash 4.0+ (associative arrays)
 
 os=$(uname -s)
 

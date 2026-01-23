@@ -45,7 +45,7 @@ A lightweight, cross-platform dotfiles manager for Linux and macOS. DFM helps yo
 
 ### Prerequisites
 
-- **bash** (4.0+ recommended)
+- **bash 4.0+** (required) - macOS ships with Bash 3.2; install newer version with `brew install bash`
 - **git**
 - **yq** (YAML processor) - automatically installed by the installer
 

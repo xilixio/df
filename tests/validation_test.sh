@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Requires Bash 4.0+ (associative arrays)
 
 # Tests for package name validation (security fix)
 # Package names should only contain letters, numbers, and underscores

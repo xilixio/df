@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Requires Bash 4.0+ (associative arrays)
 
 declare -A t=(
     [description]="Throw if no path is defined"

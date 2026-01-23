@@ -188,7 +188,7 @@ For maximum impact with minimal risk:
 
 ## Checklist
 
-- [ ] P1-BASH-VERSION
+- [x] P1-BASH-VERSION
 - [ ] P2-INSTALL-TEST-SYNTAX
 - [ ] P3-TRACK-RACE-CONDITION
 - [ ] P4-BACKUP-CLEANUP

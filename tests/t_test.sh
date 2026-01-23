@@ -1,5 +1,5 @@
-#!/bin/bash
-# dir="$PWD/tests/test_framework"
+#!/usr/bin/env bash
+# Requires Bash 4.0+ (associative arrays)
 
 declare -A t=(
     [description]="Adding 2 and 3"
