@@ -57,9 +57,15 @@ for file_or_dir in "${file_or_dir_paths[@]}"; do
         continue
     fi 
 
-    # Symlink
-    if ! mv "$file_or_dir" "$tracked_file_or_dir"; then
+    # Move file/dir to package dir using -n to prevent clobbering (avoids TOCTOU race)
+    if ! mv -n "$file_or_dir" "$tracked_file_or_dir"; then
         echo "Error moving '$basename' to '$tracked_file_or_dir'."
+        exit 1
+    fi
+
+    # Verify move succeeded (mv -n returns success even if it didn't move due to existing target)
+    if [ -e "$file_or_dir" ] && [ ! -L "$file_or_dir" ]; then
+        echo "Error: Cannot track '$basename' - destination '$tracked_file_or_dir' already exists."
         exit 1
     fi
 
