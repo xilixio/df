@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Requires Bash 4.0+ (associative arrays)
 
 os=$(uname -s)
 
 # Before all
-rm /tmp/pk{1,2,3}.tmp >/dev/null 2>&1
+rm /tmp/pk{1,2,3,4}.tmp >/dev/null 2>&1
 
 declare -A t=(
     [description]="Throw if package doesn't exist."
@@ -163,7 +164,7 @@ declare -A t=(
             bin/dfm check pk1 -s && \
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
-    [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [after_test]="rm /tmp/pk{1,2,3,4}.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk1 
 Installing package 'pk3'...
@@ -183,7 +184,7 @@ declare -A t=(
             bin/dfm check pk1 -s && \
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
-    [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [after_test]="rm /tmp/pk{1,2,3,4}.tmp || true"
     [expected_output]=""
     [expected_status]=0
 ); run_test t
@@ -194,7 +195,7 @@ declare -A t=(
             bin/dfm check pk1 -s && \
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
-    [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [after_test]="rm /tmp/pk{1,2,3,4}.tmp || true"
     [expected_output]=$(cat <<EOF
 About to install the following packages: pk3 pk1 
 Installing package 'pk3'...
@@ -214,29 +215,31 @@ declare -A t=(
             bin/dfm check pk1 -s && \
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
-    [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [after_test]="rm /tmp/pk{1,2,3,4}.tmp || true"
     [expected_output]=""
     [expected_status]=0
 ); run_test t
 
 declare -A t=(
     [description]="Install all and ignore errors"
-    [test]="bin/dfm install -y -i && 
+    [test]="bin/dfm install -y -i &&
             bin/dfm check pk1 -s && \
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
-    [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [after_test]="rm /tmp/pk{1,2,3,4}.tmp || true"
     [expected_output]=$(cat <<EOF
-About to install the following packages: pk1 pk2 pk3 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail test brew brew_packages 
+About to install the following packages: pk1 pk2 pk3 pk4 pk_no_check pk_no_install pkCD1 pkCD2 pk_install_fail test brew brew_packages 
 Installing package 'pk3'...
 Successfully installed package 'pk3'.
 Installing package 'pk2'...
 Successfully installed package 'pk2'.
 Installing package 'pk1'...
 Successfully installed package 'pk1'.
-Missing 'check' entry on 'packages.pk_no_check.Linux' in '$DFM_YAML'.
+Installing package 'pk4'...
+Successfully installed package 'pk4'.
+Missing 'check' entry on 'packages.pk_no_check.$os' in '$DFM_YAML'.
 Package 'pk_no_check' has validation errors, ignoring.
-Missing 'install' entry on 'packages.pk_no_install.Linux' in '$DFM_YAML'.
+Missing 'install' entry on 'packages.pk_no_install.$os' in '$DFM_YAML'.
 Package 'pk_no_install' has validation errors, ignoring.
 A cyclic dependency involving 'pkCD1' was found in the path '<root>->'pkCD1'->'pkCD2'->'pkCD1''.
 Package 'pkCD1' has validation errors, ignoring.
@@ -266,7 +269,7 @@ declare -A t=(
             bin/dfm check pk1 -s && \
             bin/dfm check pk2 -s && \
             bin/dfm check pk3 -s"
-    [after_test]="rm /tmp/pk{1,2,3}.tmp || true"
+    [after_test]="rm /tmp/pk{1,2,3,4}.tmp || true"
     [expected_output]=""
     [expected_status]=0
 ); run_test t
@@ -279,4 +282,4 @@ declare -A t=(
 ); run_test t
 
 # After all
-rm /tmp/pk{1,2,3}.tmp >/dev/null 2>&1
+rm /tmp/pk{1,2,3,4}.tmp >/dev/null 2>&1

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Requires Bash 4.0+ (associative arrays)
 
 # Before all
 old_yaml="$DFM_YAML"

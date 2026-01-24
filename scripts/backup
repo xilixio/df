@@ -26,18 +26,21 @@ fi
 if ! git add -A; then
     echo "Error: Failed to stage changes"
     git checkout "$original_branch" 2>/dev/null
+    git branch -D "$backup_branch" 2>/dev/null
     exit 1
 fi
 
 if ! git commit -m "[Backup] By ${username} on ${commit_time}"; then
     echo "Error: Failed to create backup commit"
     git checkout "$original_branch" 2>/dev/null
+    git branch -D "$backup_branch" 2>/dev/null
     exit 1
 fi
 
 if ! git push -u origin "$backup_branch"; then
     echo "Error: Failed to push backup branch to remote"
     git checkout "$original_branch" 2>/dev/null
+    git branch -D "$backup_branch" 2>/dev/null
     exit 1
 fi
 

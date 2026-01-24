@@ -1,6 +1,7 @@
 # DFM Improvement Plan
 
 Each item is numbered for reference. Start a new Claude Code session with:
+
 ```
 "Work on PLAN.md item P1-BASH-VERSION"
 ```
@@ -10,6 +11,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 ## Critical Priority
 
 ### P1-BASH-VERSION
+
 **Bash 4.0+ compatibility issue**
 
 - **Problem**: Scripts use `#!/bin/bash` but rely on Bash 4.0+ features (`declare -A`, `local -n`). macOS ships Bash 3.2.
@@ -22,6 +24,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Recommendation**: Option A + C (check version, document requirement)
 
 ### P2-INSTALL-TEST-SYNTAX
+
 **Syntax error in install_test.sh**
 
 - **Problem**: Unclosed quote causes tests after line 257 to not parse on Linux
@@ -30,6 +33,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Fix the heredoc quoting around the `'$DFM_YAML'` expansion in expected output
 
 ### P3-TRACK-RACE-CONDITION
+
 **TOCTOU race in track command**
 
 - **Problem**: Gap between checking if file is tracked and moving it allows data loss
@@ -41,6 +45,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 ## High Priority
 
 ### P4-BACKUP-CLEANUP
+
 **Backup command doesn't clean up on failure**
 
 - **Problem**: If commit fails after branch creation, empty backup branch remains
@@ -48,6 +53,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Add branch deletion in error handlers before `git checkout "$original_branch"`
 
 ### P5-INSTALL-DFM-ARM
+
 **install-dfm hardcodes amd64 architecture**
 
 - **Problem**: Linux yq download uses `yq_linux_amd64`, fails on ARM
@@ -55,6 +61,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Detect architecture with `uname -m` and download appropriate binary
 
 ### P6-LINK-RELATIVE-SYMLINK
+
 **link creates potentially broken symlinks**
 
 - **Problem**: Symlink target path may be relative, breaking when accessed from other directories
@@ -66,6 +73,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 ## Medium Priority
 
 ### P7-SHARED-VALIDATION
+
 **Duplicated validation logic across scripts**
 
 - **Problem**: Package name regex and YAML queries repeated in 8 files
@@ -77,6 +85,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
   - `yq_get()`
 
 ### P8-SILENT-FLAG-INCONSISTENCY
+
 **Silent mode doesn't suppress prompts**
 
 - **Problem**: `-s` flag doesn't skip confirmation prompts (needs `-y` separately)
@@ -84,6 +93,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Make `-s` imply `-y`, or document clearly that both are needed
 
 ### P9-LIST-PERFORMANCE
+
 **dfm list -i is slow with many packages**
 
 - **Problem**: Spawns new process for each package to check installation status
@@ -91,6 +101,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Batch check commands or cache results within single yq call
 
 ### P10-NEW-EXISTING-PACKAGE
+
 **new command partially executes for existing packages**
 
 - **Problem**: Skips YAML update but still creates directory/file
@@ -102,6 +113,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 ## Low Priority (Polish)
 
 ### P11-CONSISTENT-ERROR-PREFIX
+
 **Inconsistent error message formatting**
 
 - **Problem**: Some errors have "Error:" prefix, others don't
@@ -109,6 +121,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Standardize all error output to use "Error:" prefix
 
 ### P12-SUCCESS-MESSAGES
+
 **Silent success on link and track commands**
 
 - **Problem**: No feedback when operations succeed
@@ -116,6 +129,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Add success message like "Linked 'file' to 'target'"
 
 ### P13-UNREACHABLE-CODE
+
 **Dead code in check script**
 
 - **Problem**: `exit 0` at line 72 is unreachable
@@ -123,6 +137,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Solution**: Remove the unreachable line
 
 ### P14-INSTALL-DFM-FLOCK
+
 **Flawed flock usage in install-dfm**
 
 - **Problem**: Outer grep runs without lock, flock only protects inner grep
@@ -134,18 +149,21 @@ Each item is numbered for reference. Start a new Claude Code session with:
 ## Test Coverage Gaps
 
 ### T1-GIT-OPS-TESTS
+
 **No tests for git operations**
 
 - **Commands untested**: `push`, `pull`, `sync`, `diff`, `status`, `backup`, `update`
 - **Solution**: Add test files using mock git repos in `/tmp`
 
 ### T2-INTEGRATION-TESTS
+
 **No end-to-end workflow tests**
 
 - **Missing**: Full workflow tests (new → track → link → push)
 - **Solution**: Create `tests/integration_test.sh` with complete scenarios
 
 ### T3-EDGE-CASE-TESTS
+
 **Missing edge case coverage**
 
 - **Missing tests for**:
@@ -160,6 +178,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 ## Documentation
 
 ### D1-BASH-REQUIREMENT
+
 **Document Bash 4+ requirement**
 
 - **File**: `README.md:48`
@@ -167,6 +186,7 @@ Each item is numbered for reference. Start a new Claude Code session with:
 - **Change to**: "bash 4.0+ (required)" with installation instructions for macOS
 
 ### D2-DRY-RUN-FEATURE
+
 **Add dry-run mode documentation** (if implemented)
 
 - Dependent on implementing `--dry-run` flag for `install` and `track`
@@ -188,12 +208,12 @@ For maximum impact with minimal risk:
 
 ## Checklist
 
-- [ ] P1-BASH-VERSION
-- [ ] P2-INSTALL-TEST-SYNTAX
-- [ ] P3-TRACK-RACE-CONDITION
-- [ ] P4-BACKUP-CLEANUP
-- [ ] P5-INSTALL-DFM-ARM
-- [ ] P6-LINK-RELATIVE-SYMLINK
+- [x] P1-BASH-VERSION
+- [x] P2-INSTALL-TEST-SYNTAX
+- [x] P3-TRACK-RACE-CONDITION
+- [x] P4-BACKUP-CLEANUP
+- [x] P5-INSTALL-DFM-ARM
+- [x] P6-LINK-RELATIVE-SYMLINK
 - [ ] P7-SHARED-VALIDATION
 - [ ] P8-SILENT-FLAG-INCONSISTENCY
 - [ ] P9-LIST-PERFORMANCE
@@ -207,3 +227,7 @@ For maximum impact with minimal risk:
 - [ ] T3-EDGE-CASE-TESTS
 - [ ] D1-BASH-REQUIREMENT
 - [ ] D2-DRY-RUN-FEATURE
+
+## Inbox
+
+- Help flag for every command.
