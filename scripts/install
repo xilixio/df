@@ -5,6 +5,18 @@ if [ -z "$DFM_SUBCOMMAND" ]; then
     exit 1
 fi
 
+# Source the yaml merge helper
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source "$script_dir/_yaml_merge"
+
+# Cache merged YAML for performance
+DFM_MERGED_YAML=$(mktemp)
+trap 'rm -f "$DFM_MERGED_YAML"' EXIT
+
+if ! get_merged_yaml > "$DFM_MERGED_YAML"; then
+    exit 1
+fi
+
 packages=()
 declare -A package_seen  # Track installed packages to avoid duplicates
 os=$(uname -s)
@@ -44,26 +56,26 @@ validate_package() {
     fi
 
     # Validate if package is defined
-    if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-        ! $s_flag && echo "Package '$package' is not defined in '$DFM_YAML'."
+    if ! output=$(yq ".packages.$package" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        ! $s_flag && echo "Package '$package' is not defined."
         error=true
     fi
 
     # Validate if OS is defined
-    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
-        ! $s_flag && echo "Package's '$package' OS '$os' is not defined in '$DFM_YAML'."
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Package's '$package' OS '$os' is not defined."
         error=true
     fi
 
     # Validate if 'check' is defined
-    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.check" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
-        ! $s_flag && echo "Missing 'check' entry on 'packages.$package.$os' in '$DFM_YAML'."
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.check" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Missing 'check' entry on 'packages.$package.$os'."
         error=true
     fi
 
     # Validate if 'install' is defined
-    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.install" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
-        ! $s_flag && echo "Missing 'install' entry on 'packages.$package.$os' in '$DFM_YAML'."
+    if [[ "$error" != true ]] && { ! output=$(yq ".packages.$package.$os.install" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; }; then
+        ! $s_flag && echo "Missing 'install' entry on 'packages.$package.$os'."
         error=true
     fi
 
@@ -103,7 +115,7 @@ install_package() {
         return
     fi
 
-    install=$(yq ".packages.$package.$os.install" < "$DFM_YAML")
+    install=$(yq ".packages.$package.$os.install" < "$DFM_MERGED_YAML")
     
     if [ "$install" = "null" ]; then install=""; fi
 
@@ -132,7 +144,7 @@ walk_deps_and_install() {
     local new_path="${path}->'${package}'"
     local os_key_to_use="$os/$os_arch"
 
-    if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
         os_key_to_use="$os"
     fi
 

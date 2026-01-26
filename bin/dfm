@@ -20,9 +20,11 @@ Package Management:
                       -y          Skip confirmation prompts
                       -i          Ignore failures, continue installing
   deps <pkg>        Show dependencies for a package
-  new <pkg>         Create a new package entry in packages.yaml
+  new <pkg>         Create a new package entry
                       -d          Also create package directory
                       -f          Also create empty package file
+                      -t <file>   Target YAML file (in packages/ directory)
+  yaml              List YAML source files and package counts
 
 File Management:
   track <pkg> <paths...>    Move files into package dir and symlink back
@@ -38,7 +40,7 @@ Git Operations:
   backup            Create a timestamped backup branch
 
 Utilities:
-  edit              Open packages.yaml in your editor
+  edit [file]       Open packages YAML in editor (or specify file from packages/)
   update            Update dfm to latest version
   install-dfm       Install dfm and its dependencies
 
@@ -73,9 +75,25 @@ if ! [ -d "$DFM_DOTFILES" ]; then
     exit 1
 fi
 
-# Check if the YAML file exists
-if ! [ -f "$DFM_YAML" ]; then
-    echo "Error: DFM_YAML file '$DFM_YAML' doesn't exist. Please create a packages.yaml file in your dotfiles directory."
+# Check if package sources exist (packages/ directory OR single YAML file)
+packages_dir="$DFM_DOTFILES/packages"
+has_packages_dir=false
+has_single_yaml=false
+
+if [ -d "$packages_dir" ]; then
+    # Check if there are any .yaml files in the directory
+    yaml_files=$(find "$packages_dir" -maxdepth 1 -name "*.yaml" -type f 2>/dev/null | head -1)
+    if [ -n "$yaml_files" ]; then
+        has_packages_dir=true
+    fi
+fi
+
+if [ -f "$DFM_YAML" ]; then
+    has_single_yaml=true
+fi
+
+if [ "$has_packages_dir" = false ] && [ "$has_single_yaml" = false ]; then
+    echo "Error: No package sources found. Either create '$DFM_YAML' or add YAML files to '$packages_dir/'."
     exit 1
 fi
 

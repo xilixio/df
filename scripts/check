@@ -10,6 +10,18 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
+# Source the yaml merge helper
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source "$script_dir/_yaml_merge"
+
+# Cache merged YAML for performance
+DFM_MERGED_YAML=$(mktemp)
+trap 'rm -f "$DFM_MERGED_YAML"' EXIT
+
+if ! get_merged_yaml > "$DFM_MERGED_YAML"; then
+    exit 1
+fi
+
 package="$1"
 os="$(uname -s)"
 os_arch="$(uname -m)"
@@ -22,24 +34,24 @@ if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
 fi
 
 # Validate if package is defined
-if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Package '$package' is not defined in '$DFM_YAML'."
+if ! output=$(yq ".packages.$package" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Package '$package' is not defined."
     exit 1
 fi
 
 # Validate if OS is defined
-if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
     os_key_to_use="$os"
 
-    if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-        echo "Package's '$package' OS '$os_key_to_use' is not defined in '$DFM_YAML'."
+    if ! output=$(yq ".packages.$package.$os_key_to_use" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+        echo "Package's '$package' OS '$os_key_to_use' is not defined."
         exit 1
     fi
 fi
 
 # Validate if 'check' is defined
-if ! output=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Missing 'check' entry on 'packages.$package.$os_key_to_use' in '$DFM_YAML'."
+if ! output=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Missing 'check' entry on 'packages.$package.$os_key_to_use'."
     exit 1
 fi
 
@@ -58,7 +70,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Check package subcommand
-check_command=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_YAML")
+check_command=$(yq ".packages.$package.$os_key_to_use.check" < "$DFM_MERGED_YAML")
 
 # if eval "$check_command" >/dev/null 2>&1; then
 if eval "$check_command"; then

@@ -10,6 +10,18 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
+# Source the yaml merge helper
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source "$script_dir/_yaml_merge"
+
+# Cache merged YAML for performance
+DFM_MERGED_YAML=$(mktemp)
+trap 'rm -f "$DFM_MERGED_YAML"' EXIT
+
+if ! get_merged_yaml > "$DFM_MERGED_YAML"; then
+    exit 1
+fi
+
 package="$1"
 os=$(uname -s)
 os_arch="$(uname -m)"
@@ -22,16 +34,16 @@ if [[ ! "$package" =~ ^[a-zA-Z0-9_]+$ ]]; then
 fi
 
 # Validate if package is defined
-if ! output=$(yq ".packages.$package" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
-    echo "Package '$package' is not defined in '$DFM_YAML'."
+if ! output=$(yq ".packages.$package" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    echo "Package '$package' is not defined."
     exit 1
 fi
 
 # Check for empty deps or missing entry
-if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
     os_key_to_use="$os"
 
-    if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
+    if ! output=$(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_MERGED_YAML") || [ -z "$output" ] || [ "$output" = "null" ]; then
         exit 0
     fi
 fi
@@ -41,7 +53,7 @@ deps=()
 
 while IFS= read -r line; do
     deps+=("$line")
-done < <(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_YAML" | sed 's/^- //')
+done < <(yq ".packages.$package.$os_key_to_use.deps" < "$DFM_MERGED_YAML" | sed 's/^- //')
 
 for dep in "${deps[@]}"; do
     echo "$dep"

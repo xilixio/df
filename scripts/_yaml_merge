@@ -1,0 +1,207 @@
+#!/bin/bash
+
+# Helper script for merging multiple YAML package files
+# This script provides functions for multi-file package support
+
+# Get the packages directory path
+get_packages_dir() {
+    echo "$DFM_DOTFILES/packages"
+}
+
+# Check if multi-file mode is active (packages/ dir exists with YAML files)
+is_multifile_mode() {
+    local packages_dir
+    packages_dir=$(get_packages_dir)
+
+    if [ -d "$packages_dir" ]; then
+        # Check if there are any .yaml files in the directory
+        local yaml_files
+        yaml_files=$(find "$packages_dir" -maxdepth 1 -name "*.yaml" -type f 2>/dev/null | head -1)
+        [ -n "$yaml_files" ]
+    else
+        return 1
+    fi
+}
+
+# Get list of all YAML files in packages directory
+get_yaml_files() {
+    local packages_dir
+    packages_dir=$(get_packages_dir)
+
+    if [ -d "$packages_dir" ]; then
+        find "$packages_dir" -maxdepth 1 -name "*.yaml" -type f 2>/dev/null | sort
+    fi
+}
+
+# Validate a YAML file has packages: key with at least one package
+validate_yaml_file() {
+    local file="$1"
+
+    # Check if file exists and is readable
+    if [ ! -r "$file" ]; then
+        return 1
+    fi
+
+    # Check if it has packages: key with content
+    local packages_output
+    packages_output=$(yq '.packages | keys | length' < "$file" 2>/dev/null)
+
+    if [ -z "$packages_output" ] || [ "$packages_output" = "0" ] || [ "$packages_output" = "null" ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+# Get all package names from a single YAML file
+get_packages_from_file() {
+    local file="$1"
+    yq '.packages | keys | .[]' < "$file" 2>/dev/null
+}
+
+# Check for duplicate packages across all YAML files
+# Outputs valid file paths to stdout (one per line)
+# Returns 0 if no duplicates, 1 if duplicates found (with error message to stderr)
+check_for_duplicates() {
+    local duplicates_found=false
+    local pkg_list_file
+    local valid_files_list
+    pkg_list_file=$(mktemp)
+    valid_files_list=$(mktemp)
+    trap 'rm -f "$pkg_list_file" "$valid_files_list"' RETURN
+
+    while IFS= read -r yaml_file; do
+        [ -z "$yaml_file" ] && continue
+
+        if ! validate_yaml_file "$yaml_file"; then
+            echo "Warning: Skipping invalid YAML file '$yaml_file' (missing or empty packages: key)" >&2
+            continue
+        fi
+
+        # Track valid file
+        echo "$yaml_file" >> "$valid_files_list"
+
+        while IFS= read -r pkg; do
+            [ -z "$pkg" ] && continue
+
+            # Check if package already exists in our list
+            local existing_file
+            existing_file=$(grep "^${pkg}	" "$pkg_list_file" 2>/dev/null | cut -f2)
+
+            if [ -n "$existing_file" ]; then
+                echo "Error: Duplicate package '$pkg' found in:" >&2
+                echo "  - $existing_file" >&2
+                echo "  - $yaml_file" >&2
+                duplicates_found=true
+            else
+                # Add to list: pkg<tab>file
+                printf "%s\t%s\n" "$pkg" "$yaml_file" >> "$pkg_list_file"
+            fi
+        done < <(get_packages_from_file "$yaml_file")
+    done < <(get_yaml_files)
+
+    if [ "$duplicates_found" = true ]; then
+        return 1
+    fi
+
+    # Output valid files to stdout
+    cat "$valid_files_list"
+    return 0
+}
+
+# Get merged YAML output from all sources
+# Outputs a single YAML document with all packages merged
+# Falls back to $DFM_YAML if not in multi-file mode
+get_merged_yaml() {
+    if ! is_multifile_mode; then
+        # Single file mode - just output the single file
+        cat "$DFM_YAML"
+        return 0
+    fi
+
+    # Multi-file mode - check for duplicates and get valid files
+    local valid_files_output
+    valid_files_output=$(check_for_duplicates)
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+
+    if [ -z "$valid_files_output" ]; then
+        echo "Error: No valid YAML files found in packages directory" >&2
+        return 1
+    fi
+
+    # Convert newline-separated files to space-separated for yq
+    local files_to_merge
+    files_to_merge=$(echo "$valid_files_output" | tr '\n' ' ')
+
+    # Use yq to merge all files using ireduce
+    # shellcheck disable=SC2086
+    yq eval-all '. as $item ireduce ({}; . * $item)' $files_to_merge
+}
+
+# Get the source file for a specific package
+# Returns the file path or empty if not found
+get_package_source_file() {
+    local package="$1"
+
+    if ! is_multifile_mode; then
+        echo "$DFM_YAML"
+        return 0
+    fi
+
+    while IFS= read -r yaml_file; do
+        [ -z "$yaml_file" ] && continue
+
+        if ! validate_yaml_file "$yaml_file"; then
+            continue
+        fi
+
+        if yq eval ".packages | has(\"$package\")" < "$yaml_file" 2>/dev/null | grep -q "true"; then
+            echo "$yaml_file"
+            return 0
+        fi
+    done < <(get_yaml_files)
+
+    return 1
+}
+
+# List all valid YAML source files with package counts
+list_yaml_sources() {
+    local total=0
+
+    if ! is_multifile_mode; then
+        local count
+        count=$(yq '.packages | keys | length' < "$DFM_YAML" 2>/dev/null || echo "0")
+        local pkg_word="packages"
+        [ "$count" -eq 1 ] && pkg_word="package"
+        echo "$DFM_YAML ($count $pkg_word)"
+        return 0
+    fi
+
+    echo "Package sources:"
+
+    while IFS= read -r yaml_file; do
+        [ -z "$yaml_file" ] && continue
+
+        if ! validate_yaml_file "$yaml_file"; then
+            echo "  $(basename "$yaml_file")  (invalid - skipped)"
+            continue
+        fi
+
+        local count
+        count=$(yq '.packages | keys | length' < "$yaml_file" 2>/dev/null || echo "0")
+        total=$((total + count))
+
+        # Show relative path from packages dir
+        local rel_path
+        rel_path=$(basename "$yaml_file")
+        local pkg_word="packages"
+        [ "$count" -eq 1 ] && pkg_word="package"
+        printf "  packages/%-20s (%d %s)\n" "$rel_path" "$count" "$pkg_word"
+    done < <(get_yaml_files)
+
+    local total_word="packages"
+    [ "$total" -eq 1 ] && total_word="package"
+    echo "Total: $total $total_word"
+}

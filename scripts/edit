@@ -5,28 +5,89 @@ if [ -z "$DFM_SUBCOMMAND" ]; then
     exit 1
 fi
 
-# Ensure DFM_YAML variable is not empty
-if [ -z "$DFM_YAML" ]; then
-    echo "The DFM_YAML variable is not set. Exiting."
-    exit 1
-fi
+# Source the yaml merge helper
+script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+source "$script_dir/_yaml_merge"
 
 # Function to check if a program exists
 command_exists() {
     command -v "$1" &> /dev/null
 }
 
-# Try to use $EDITOR, fall back to vim, vi, then nano
-if [ -n "$EDITOR" ]; then
-    "$EDITOR" "$DFM_YAML"
-elif command_exists vim; then
-    vim "$DFM_YAML"
-elif command_exists vi; then
-    vi "$DFM_YAML"
-elif command_exists nano; then
-    nano "$DFM_YAML"
-else
-    echo "No suitable editor found. Please install vim, vi, or nano, or set the EDITOR environment variable."
-    exit 1
-fi
+# Function to open file in editor
+open_in_editor() {
+    local file="$1"
 
+    if [ ! -f "$file" ]; then
+        echo "File '$file' does not exist."
+        exit 1
+    fi
+
+    if [ -n "$EDITOR" ]; then
+        "$EDITOR" "$file"
+    elif command_exists vim; then
+        vim "$file"
+    elif command_exists vi; then
+        vi "$file"
+    elif command_exists nano; then
+        nano "$file"
+    else
+        echo "No suitable editor found. Please install vim, vi, or nano, or set the EDITOR environment variable."
+        exit 1
+    fi
+}
+
+# Determine which file to edit
+if [ $# -ge 1 ]; then
+    # File argument provided
+    file_arg="$1"
+
+    if is_multifile_mode; then
+        # In multi-file mode, interpret as file in packages/ directory
+        target_file="$DFM_DOTFILES/packages/$file_arg"
+
+        # Add .yaml extension if needed
+        if [[ "$target_file" != *.yaml ]]; then
+            target_file="${target_file}.yaml"
+        fi
+    else
+        # In single-file mode, only allow editing the single YAML file
+        if [ "$file_arg" = "$(basename "$DFM_YAML")" ]; then
+            target_file="$DFM_YAML"
+        else
+            echo "Error: In single-file mode, only '$(basename "$DFM_YAML")' can be edited."
+            echo "To use multiple YAML files, create a 'packages/' directory with .yaml files."
+            exit 1
+        fi
+    fi
+
+    open_in_editor "$target_file"
+else
+    # No file argument
+    if is_multifile_mode; then
+        # List available files
+        echo "Multiple YAML files available. Please specify which to edit:"
+        echo ""
+        while IFS= read -r yaml_file; do
+            [ -z "$yaml_file" ] && continue
+            count=$(yq '.packages | keys | length' < "$yaml_file" 2>/dev/null || echo "0")
+            pkg_word="packages"
+            [ "$count" -eq 1 ] && pkg_word="package"
+            printf "  dfm edit %-20s (%d %s)\n" "$(basename "$yaml_file")" "$count" "$pkg_word"
+        done < <(get_yaml_files)
+        echo ""
+        if [ -f "$DFM_YAML" ] && validate_yaml_file "$DFM_YAML"; then
+            echo "Or edit the legacy single file:"
+            echo "  dfm edit $(basename "$DFM_YAML")"
+        fi
+        exit 0
+    else
+        # Single file mode - edit DFM_YAML
+        if [ -z "$DFM_YAML" ]; then
+            echo "The DFM_YAML variable is not set. Exiting."
+            exit 1
+        fi
+
+        open_in_editor "$DFM_YAML"
+    fi
+fi
